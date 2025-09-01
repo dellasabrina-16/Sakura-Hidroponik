@@ -64,3 +64,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+=======
+# Sakura-Hidroponik
+SAKURA HIDROPONIK adalah aplikasi manajemen usaha hidroponik berbasis web untuk mengelola produk, stok hasil panen, pesanan masuk, serta menampilkan laporan mingguan. Dilengkapi dashboard interaktif dan landing page untuk pelanggan.
+>>>>>>> 28087e33f9ee11a6bc675ec29002124989cfdebe
