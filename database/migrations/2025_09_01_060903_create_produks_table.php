@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_produk');
             $table->string('foto_produk');
-            $table->string('deskripsi_produk');
+            $table->text('deskripsi_produk');
             $table->integer('harga_kg');
             $table->timestamps();
         });

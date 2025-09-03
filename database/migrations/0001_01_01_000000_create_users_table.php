@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('password');
             $table->string('foto')->nullable();
+            $table->enum('role', ['admin', 'user'])->default('admin');
             $table->timestamps();
         });
     }
