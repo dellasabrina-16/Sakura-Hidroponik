@@ -1,33 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use app\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return view('customer.pelanggan');
 });
 
-Route::get('/dashboard', function () {
-    return view('admin.dashboard');
+
+// Login Route
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Admin Route
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AuthController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/produk', fn() => view('admin.produk'));
+    Route::get('/admin/stok', fn() => view('admin.stok'));
+    Route::get('/admin/pesanan', fn() => view('admin.pesananmasuk'));
+    Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
 });
 
-Route::get('/pesananmasuk', function () {
-    return view('admin.pesananmasuk');
-});
-
-Route::get('/produk', function () {
-    return view('admin.produk');
-});
-
-Route::get('/pesananselesai', function () {
-    return view('admin.pesananselesai');
-});
-
-Route::get('/stok', function () {
-    return view('admin.stok');
-});
-
-Route::get('/login', function () {
-    return view('login');
-});
 

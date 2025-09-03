@@ -63,14 +63,13 @@
                                         <p class="small ps-3">Silahkan masuk ke akun anda</p>
                                     </div>
 
-                                    <form class="row g-3 needs-validation" novalidate>
-
+                                    <form class="row g-3 needs-validation" method="POST" action="/login" novalidate>
+                                        @csrf
                                         <div class="col-12">
                                             <label for="yourUsername" class="form-label">EMAIL / USERNAME</label>
                                             <div class="input-group has-validation">
-                                                <input type="email" class="form-control" id="exampleInputEmail1"
-                                                    aria-describedby="emailHelp"
-                                                    placeholder="Masukkan email atau nama pengguna ">
+                                                <input type="email" name="email" class="form-control" id=""
+                                                    placeholder="Masukkan email atau nama pengguna" required>
                                             </div>
                                         </div>
 
@@ -80,8 +79,8 @@
                                                 <a href="#" class="small text-muted">Lupa Sandi?</a>
                                             </div>
                                             <div class="input-group">
-                                                <input type="password" id="password" class="form-control"
-                                                    placeholder="Masukkan kata sandi">
+                                                <input type="password" name="password" id="" class="form-control"
+                                                    placeholder="Masukkan kata sandi" required>
                                                 <button class="btn btn-outline-secondary" type="button"
                                                     id="togglePassword">
                                                     <i class="bi bi-eye"></i>
