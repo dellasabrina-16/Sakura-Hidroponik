@@ -20,6 +20,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/stok', fn() => view('admin.stok'));
     Route::get('/admin/pesanan', fn() => view('admin.pesananmasuk'));
     Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
+    Route::get('/admin/laporan/mingguan', fn() => view('admin.laporanmingguan'));
+    Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
+    Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));
 });
 
 

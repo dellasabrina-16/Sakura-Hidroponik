@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- ================= HEAD ================= -->
+
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -19,28 +21,24 @@
         href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
         rel="stylesheet">
 
-    <!-- Vendor CSS Files -->
-    <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Hanya pilih satu Bootstrap (pakai CDN biar aman) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/2.3.3/css/dataTables.bootstrap5.css" rel="stylesheet">
+
+    <!-- Vendor CSS -->
     <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/quill/quill.snow.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
-    {{-- <link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet"> --}}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/2.3.3/css/dataTables.bootstrap5.css" rel="stylesheet">
 
-    <!-- Template Main CSS File -->
+    <!-- Template Main CSS -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
-
-    <!-- ======================================================= * Template Name:
-        NiceAdmin * Template URL:
-        https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ * Updated:
-        Apr 20 2024 with Bootstrap v5.3.3 * Author: BootstrapMade.com * License:
-        https://bootstrapmade.com/license/
-        ======================================================== -->
     @yield('css')
 </head>
+
 
 <body class="d-flex flex-column min-vh-100">
 
@@ -107,58 +105,115 @@
 
     <!-- ======= Sidebar ======= -->
     <aside id="sidebar" class="sidebar">
-
         <ul class="sidebar-nav" id="sidebar-nav">
 
+            <!-- Dashboard -->
             <li class="nav-item">
-                <a class="nav-link " href="{{ url('/admin/dashboard') }}">
+                <a class="nav-link {{ Request::is('admin/dashboard') ? '' : 'collapsed' }}"
+                    href="{{ url('/admin/dashboard') }}">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-            <!-- End Dashboard Nav -->
 
+            <!-- Pesanan -->
             <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-                    <i class="bi bi-cart-check-fill"></i>
+                <a class="nav-link {{ Request::is('admin/pesanan*') || Request::is('admin/pesananselesai*') ? '' : 'collapsed' }}"
+                    data-bs-target="#pesanan-nav" data-bs-toggle="collapse" href="#pesanan-nav">
+                    <i class="bi bi-cart2"></i>
                     <span>Pesanan</span>
                     <i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-                <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <ul id="pesanan-nav"
+                    class="nav-content collapse {{ Request::is('admin/pesanan') || Request::is('admin/pesananselesai') ? 'show' : '' }}"
+                    data-bs-parent="#sidebar-nav">
+
+                    <!-- Pesanan Masuk -->
                     <li>
-                        <a href="{{ url('/admin/pesanan') }}">
-                            <i class="bi bi-circle"></i>
+                        <a href="{{ url('/admin/pesanan') }}"
+                            class="{{ Request::is('admin/pesanan') ? 'active' : '' }}">
+                            <i
+                                class="bi {{ Request::is('admin/pesanan') ? 'bi-circle-fill text-success' : 'bi-circle text-success' }}"></i>
                             <span>Pesanan Masuk</span>
                         </a>
                     </li>
+
+                    <!-- Pesanan Selesai -->
                     <li>
-                        <a href="{{ url('/admin/pesananselesai') }}">
-                            <i class="bi bi-circle"></i>
+                        <a href="{{ url('/admin/pesananselesai') }}"
+                            class="{{ Request::is('admin/pesananselesai') ? 'active' : '' }}">
+                            <i
+                                class="bi {{ Request::is('admin/pesananselesai') ? 'bi-circle-fill text-success' : 'bi-circle text-success' }}"></i>
                             <span>Pesanan Selesai</span>
                         </a>
                     </li>
                 </ul>
             </li>
 
+            <!-- Produk -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ url('/admin/produk') }}">
-                    <i class="bi bi-box-seam-fill"></i>
+                <a class="nav-link {{ Request::is('admin/produk*') ? '' : 'collapsed' }}"
+                    href="{{ url('/admin/produk') }}">
+                    <i class="bi bi-box-seam"></i>
                     <span>Produk</span>
                 </a>
             </li>
 
+            <!-- Stok -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ url('/admin/stok') }}">
+                <a class="nav-link {{ Request::is('admin/stok*') ? '' : 'collapsed' }}"
+                    href="{{ url('/admin/stok') }}">
                     <i class="bi bi-card-checklist"></i>
                     <span>Stok</span>
                 </a>
             </li>
 
-            <!-- End Tables Nav -->
-            <li class="nav-heading">Laporan</li>
-        </ul>
+            <!-- Laporan -->
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/laporan/*') ? '' : 'collapsed' }}"
+                    data-bs-target="#laporan-nav" data-bs-toggle="collapse" href="#laporan-nav">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Laporan</span>
+                    <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="laporan-nav" class="nav-content collapse {{ Request::is('admin/laporan/*') ? 'show' : '' }}"
+                    data-bs-parent="#sidebar-nav">
 
+                    <!-- Laporan Mingguan -->
+                    <li>
+                        <a href="{{ url('/admin/laporan/mingguan') }}"
+                            class="{{ Request::is('admin/laporan/mingguan') ? 'active' : '' }}">
+                            <i
+                                class="bi {{ Request::is('admin/laporan/mingguan') ? 'bi-circle-fill text-success' : 'bi-circle text-success' }}"></i>
+                            <span>Laporan Mingguan</span>
+                        </a>
+                    </li>
+
+                    <!-- Laporan Bulanan -->
+                    <li>
+                        <a href="{{ url('/admin/laporan/bulanan') }}"
+                            class="{{ Request::is('admin/laporan/bulanan') ? 'active' : '' }}">
+                            <i
+                                class="bi {{ Request::is('admin/laporan/bulanan') ? 'bi-circle-fill text-success' : 'bi-circle text-success' }}"></i>
+                            <span>Laporan Bulanan</span>
+                        </a>
+                    </li>
+
+                    <!-- Laporan Tahunan -->
+                    <li>
+                        <a href="{{ url('/admin/laporan/tahunan') }}"
+                            class="{{ Request::is('admin/laporan/tahunan') ? 'active' : '' }}">
+                            <i
+                                class="bi {{ Request::is('admin/laporan/tahunan') ? 'bi-circle-fill text-success' : 'bi-circle text-success' }}"></i>
+                            <span>Laporan Tahunan</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </aside>
+
+
     <!-- End Sidebar-->
     <main id="main" class="main">
         @yield('isi')
@@ -174,11 +229,6 @@
                     <b>RPLutioners</b></span></strong>. All Rights Reserved
         </div>
         <div class="credits">
-            <!-- All the links in the footer should remain intact. -->
-            <!-- You can delete the links only if you purchased the pro version. -->
-            <!-- Licensing information: https://bootstrapmade.com/license/ -->
-            <!-- Purchase the pro version with working PHP/AJAX contact form:
-            https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
             Designed by Team RPLutioners
         </div>
     </footer>
@@ -187,23 +237,28 @@
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
         <i class="bi bi-arrow-up-short"></i>
     </a>
+    <!-- ================= JS ================= -->
 
+    <!-- Bootstrap JS (hanya sekali) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery & DataTables -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.3.3/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.3.3/js/dataTables.bootstrap5.js"></script>
+
+    <!-- Vendor JS -->
     <script src="{{ asset('assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/chart.js/chart.umd.js') }}"></script>
     <script src="{{ asset('assets/vendor/echarts/echarts.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/quill/quill.js') }}"></script>
-    {{-- <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script> --}}
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.3/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.3.3/js/dataTables.bootstrap5.js"></script>
     <script src="{{ asset('assets/vendor/tinymce/tinymce.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
 
-    <!-- Template Main JS File -->
+    <!-- Template Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
     @yield('script')
+
 
 </body>
 
