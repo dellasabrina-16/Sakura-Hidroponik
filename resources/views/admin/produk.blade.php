@@ -2,33 +2,25 @@
 
 @section('css')
     <style>
-        /* Mengatur ukuran font untuk seluruh tabel DataTables */
         #produks,
         .dataTables_wrapper .dataTables_length,
         .dataTables_wrapper .dataTables_filter,
         .dataTables_wrapper .dataTables_info,
         .dataTables_wrapper .dataTables_paginate {
             font-size: 0.8rem;
-            /* Anda bisa sesuaikan nilai ini (misalnya 0.75rem, 12px, dll) */
         }
 
-        /* Mengatur padding di dalam sel tabel (th dan td) agar lebih ringkas */
         #produks th,
         #produks td {
             padding: 0.5rem;
-            /* Sesuaikan nilai padding untuk jarak yang ideal */
         }
 
-        /* Mengatur ukuran ikon agar tidak terlalu besar */
         #produks .btn .bx {
             font-size: 1rem;
-            /* Sesuaikan ukuran ikon */
         }
 
-        /* Mengatur ukuran input pencarian agar lebih kecil */
         .dataTables_wrapper .dataTables_filter input[type="search"] {
             height: 25px;
-            /* Sesuaikan tinggi */
             font-size: 0.8rem;
         }
     </style>
@@ -37,7 +29,6 @@
 @section('isi')
     <div
         class="pagetitle d-flex flex-column flex-md-row justify-content-md-between align-items-start align-items-md-center mb-3">
-        {{-- Grup Judul dan Breadcrumb --}}
         <div class="mb-3 mb-md-0">
             <h1>Produk</h1>
             <nav>
@@ -54,18 +45,16 @@
         </button>
     </div>
     <div class="card p-4">
-        {{-- caption bisa dihilangkan atau di-styling jika diperlukan, DataTables punya info default --}}
-        {{-- <caption class="mb-2">Daftar Produk</caption> --}}
         <div class="table-responsive">
-            <table id="produks" class="table table-striped table-sm"> {{-- Tambahkan .table-sm untuk tabel lebih ringkas --}}
+            <table id="produks" class="table table-striped table-sm">
                 <thead>
                     <tr>
-                        <th class="text-center">No</th> {{-- text-center untuk rata tengah --}}
+                        <th class="text-center">No</th> 
                         <th>Nama Produk</th>
                         <th>Foto Produk</th>
                         <th>Deskripsi</th>
-                        <th class="text-end">Harga per Kg</th> {{-- text-end untuk rata kanan --}}
-                        <th class="text-center">Aksi</th> {{-- text-center untuk rata tengah --}}
+                        <th class="text-end">Harga per Kg</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,8 +62,8 @@
                         <td class="text-center">1</td>
                         <td>Selada</td>
                         <td>
-                            <img src="https://via.placeholder.com/80" alt="Foto Produk" class="img-fluid rounded">
-                            {{-- rounded untuk sudut melengkung --}}
+                            <img src="{{ asset('assets/img/profile-img.jpg') }}" alt="Foto Produk"
+                                class="img-fluid rounded">
                         </td>
                         <td>
                             Lorem Ipsum is simply dummy text of the printing and typesetting industry.
@@ -82,14 +71,12 @@
                         <td class="text-end">Rp 21.000</td>
                         <td>
                             <div class="d-flex justify-content-center gap-2">
-                                {{-- Tombol Edit dengan warna dan ikon yang lebih estetik --}}
                                 <button class="btn btn-info btn-sm text-white" data-bs-toggle="modal"
                                     data-bs-target="#modalEditProduk" title="Edit Produk">
-                                    <i class='bx bx-edit'></i> {{-- Ikon edit dari Boxicons --}}
+                                    <i class='bx bx-edit'></i>
                                 </button>
-                                {{-- Tombol Hapus dengan warna dan ikon yang lebih estetik --}}
                                 <button class="btn btn-danger btn-sm" title="Hapus Produk">
-                                    <i class='bx bx-trash'></i> {{-- Ikon hapus dari Boxicons --}}
+                                    <i class='bx bx-trash'></i> 
                                 </button>
                             </div>
                         </td>
@@ -127,7 +114,6 @@
                                 <input type="number" class="form-control" id="hargaProduk" placeholder="Masukkan harga">
                             </div>
                             <div class="text-end">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                 <button type="submit" class="btn btn-success">Simpan</button>
                             </div>
                         </form>
@@ -166,7 +152,6 @@
                                     placeholder="Masukkan harga">
                             </div>
                             <div class="text-end">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                 <button type="submit" class="btn btn-success">Simpan</button>
                             </div>
                         </form>

@@ -1,83 +1,104 @@
 @extends('master')
 
+@section('css')
+    <style>
+        #stoks,
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 0.8rem;
+        }
+
+        #stoks th,
+        #stoks td {
+            padding: 0.5rem;
+        }
+
+        #stoks .btn .bx {
+            font-size: 1rem;
+        }
+
+        .dataTables_wrapper .dataTables_filter input[type="search"] {
+            height: 25px;
+            font-size: 0.8rem;
+        }
+    </style>
+@endsection
+
 @section('isi')
-    <div class="container-fluid p-4" style="background-color: #f8fdf8; min-height: 100vh;">
-        <!-- Judul Halaman -->
-        <div class="mb-4">
-            <h3 class="fw-bold">Stok</h3>
-            <p class="text-muted mb-0">Kontrol ketersediaan pemesanan melalui fitur aktif/nonaktif.</p>
+    <div
+        class="pagetitle d-flex flex-column flex-md-row justify-content-md-between align-items-start align-items-md-center mb-3">
+        <div class="mb-3 mb-md-0">
+            <h1>Stok</h1>
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a>Kontrol ketersediaan pemesanan melalui fitur aktif/nonaktif.</a></li>
+                </ol>
+            </nav>
         </div>
-
-        <!-- Dropdown dan Search -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center">
-                <select class="form-select form-select-sm w-auto me-2">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
-                <span>entries per page</span>
-            </div>
-            <input type="text" class="form-control form-control-sm w-25" placeholder="Search...">
-        </div>
-
-        <!-- Tabel Stok -->
+    </div>
+    <div class="card p-4">
         <div class="table-responsive">
-            <table class="table table-bordered align-middle text-center">
-                <thead class="table-light">
+            <table id="stoks" class="table table-striped table-sm">
+                <thead>
                     <tr>
-                        <th style="width: 5%;">No</th>
-                        <th style="width: 25%;">Nama Produk</th>
-                        <th style="width: 20%;">Stok per Kg</th>
-                        <th style="width: 25%;">Status Produk<br>(Tersedia/Tidak)</th>
-                        <th style="width: 25%;">Aksi</th>
+                        <th class="text-center">No</th>
+                        <th>Nama Produk</th>
+                        <th class="text-center">Stok per Kg</th>
+                        <th class="text-center">Status Produk <br> (Aktif/Nonaktif)</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>1</td>
+                        <td class="text-center">1</td>
                         <td>Selada</td>
-                        <td>40</td>
-                        <td>
+                        <td class="text-center">
+                            20 Kg
+                        </td>
+                        <td class="text-center">
                             <div class="form-check form-switch d-flex justify-content-center">
                                 <input class="form-check-input" type="checkbox" role="switch">
                             </div>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <button class="btn btn-sm btn-success" data-bs-toggle="modal"
-                                data-bs-target="#Modaltambahstok">Tambahkan Stok</button>
+                                data-bs-target="#ModalTambahStok">Tambahkan Stok</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <!-- Modal Tambah Produk -->
-    <div class="modal fade" id="Modaltambahstok" tabindex="-1" aria-labelledby="modaltambahstok" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="modalTambahProdukLabel">Tambah Produk</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label for="namaProduk" class="form-label">Nama Produk</label>
-                            <input type="text" class="form-control" id="namaProduk" placeholder="Masukkan nama produk">
-                        </div>
-                        <div class="mb-3">
-                            <label for="namaProduk" class="form-label">Stok</label>
-                            <input type="text" class="form-control" id="namaProduk" placeholder="Masukkan nama produk">
-                        </div>
-                        <div class="text-end">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-success">Simpan</button>
-                        </div>
-                    </form>
+        <div class="modal fade" id="ModalTambahStok" tabindex="-1" aria-labelledby="modalTambahStokLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-3">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title fw-bold" id="modalTambahStokLabel">Tambah Stok $nama-produk</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="namaProduk" class="form-label">Stok</label>
+                                <input type="text" class="form-control" id="namaProduk"
+                                    placeholder="Masukkan nama produk">
+                            </div>
+                            <div class="text-end">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-success">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection
+
+    @section('script')
+        <script>
+            new DataTable('#stoks');
+        </script>
+    @endsection
