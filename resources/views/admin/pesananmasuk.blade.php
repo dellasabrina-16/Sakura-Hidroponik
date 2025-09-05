@@ -23,6 +23,37 @@
             height: 25px;
             font-size: 0.8rem;
         }
+
+        .btn-hijau {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-hijau:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: #fff;
+        }
+
+        /* Tombol link hijau */
+        .btn-link.btn-sm {
+            color: #28a745;
+            /* hijau tema */
+            padding: 0;
+            /* tetap sesuai class p-0 */
+            font-size: 0.9rem;
+            /* opsional: sesuaikan ukuran */
+            text-decoration: none;
+            /* hilangkan underline default */
+        }
+
+        .btn-link.btn-sm:hover {
+            color: #218838;
+            /* hijau gelap saat hover */
+            text-decoration: none;
+            /* tetap tanpa underline */
+        }
     </style>
 @endsection
 
@@ -39,7 +70,7 @@
         </div>
 
         {{-- Tombol "Tambah Pesanan" --}}
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ModalTambahPesanan">
+        <button class="btn btn-hijau" data-bs-toggle="modal" data-bs-target="#ModalTambahPesanan">
             <i class='bx bx-plus me-2'></i> Tambah Pesanan
         </button>
     </div>
@@ -197,7 +228,7 @@
                     </div>
 
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-primary" onclick="printStruk('printArea1')">
+                        <button type="button" class="btn btn-hijau" onclick="printStruk('printArea1')">
                             <i class="bi bi-printer"></i> Print Struk
                         </button>
                     </div>
@@ -293,7 +324,7 @@
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-success">Simpan</button>
+                        <button type="button" class="btn btn-hijau">Simpan</button>
                     </div>
                 </div>
             </div>

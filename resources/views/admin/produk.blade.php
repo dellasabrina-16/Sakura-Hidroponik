@@ -23,6 +23,18 @@
             height: 25px;
             font-size: 0.8rem;
         }
+
+        .btn-hijau {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-hijau:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: #fff;
+        }
     </style>
 @endsection
 
@@ -40,7 +52,7 @@
         </div>
 
         {{-- Tombol "Tambah Produk" --}}
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambahProduk">
+        <button class="btn btn-hijau" data-bs-toggle="modal" data-bs-target="#modalTambahProduk">
             <i class='bx bx-plus me-2'></i> Tambah Produk
         </button>
     </div>
@@ -49,7 +61,7 @@
             <table id="produks" class="table table-striped table-sm">
                 <thead>
                     <tr>
-                        <th class="text-center">No</th> 
+                        <th class="text-center">No</th>
                         <th>Nama Produk</th>
                         <th>Foto Produk</th>
                         <th>Deskripsi</th>
@@ -76,7 +88,7 @@
                                     <i class='bx bx-edit'></i>
                                 </button>
                                 <button class="btn btn-danger btn-sm" title="Hapus Produk">
-                                    <i class='bx bx-trash'></i> 
+                                    <i class='bx bx-trash'></i>
                                 </button>
                             </div>
                         </td>
@@ -114,7 +126,7 @@
                                 <input type="number" class="form-control" id="hargaProduk" placeholder="Masukkan harga">
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success">Simpan</button>
+                                <button type="submit" class="btn btn-hijau">Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -152,17 +164,18 @@
                                     placeholder="Masukkan harga">
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success">Simpan</button>
+                                <button type="submit" class="btn btn-hijau">Simpan</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @section('script')
-        <script>
-            new DataTable('#produks');
-        </script>
-    @endsection
+@section('script')
+    <script>
+        new DataTable('#produks');
+    </script>
+@endsection

@@ -23,6 +23,18 @@
             height: 25px;
             font-size: 0.8rem;
         }
+
+        .btn-hijau {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-hijau:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: #fff;
+        }
     </style>
 @endsection
 
@@ -63,7 +75,7 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-success" data-bs-toggle="modal"
+                            <button class="btn btn-sm btn-hijau`" data-bs-toggle="modal"
                                 data-bs-target="#ModalTambahStok">Tambahkan Stok</button>
                         </td>
                     </tr>
@@ -76,29 +88,31 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content p-3">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="modalTambahStokLabel">Tambah Stok $nama-produk</h5>
+                        <h5 class="modal-title fw-bold" id="modalTambahStokLabel">Tambah Stok <span
+                                id="namaProdukLabel">$nama-produk</span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form id="formTambahStok">
                             <div class="mb-3">
-                                <label for="namaProduk" class="form-label">Stok</label>
-                                <input type="text" class="form-control" id="namaProduk"
-                                    placeholder="Masukkan nama produk">
+                                <label for="stokProduk" class="form-label">Stok (kg)</label>
+                                <input type="number" class="form-control" id="stokProduk"
+                                    placeholder="Masukkan jumlah stok dalam kg" min="0" step="1" required>
+                                <div class="form-text">Masukkan stok dalam satuan kilogram (kg). Hanya angka bulat.</div>
                             </div>
                             <div class="text-end">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-success">Simpan</button>
+                                <button type="submit" class="btn btn-hijau">Simpan</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @section('script')
-        <script>
-            new DataTable('#stoks');
-        </script>
-    @endsection
+@section('script')
+    <script>
+        new DataTable('#stoks');
+    </script>
+@endsection
