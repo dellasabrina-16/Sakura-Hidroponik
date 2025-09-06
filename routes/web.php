@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProdukController;
 
 Route::get('/', function () {
     return view('customer.pelanggan');
@@ -16,7 +17,16 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Admin Route
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AuthController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/admin/produk', fn() => view('admin.produk'));
+
+    // Route::get('/admin/produk', fn() => view('admin.produk'));
+    Route::get('/admin/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('/admin/produk/create', [ProdukController::class, 'create'])->name('produk.create');
+    Route::post('/admin/produk', [ProdukController::class, 'store'])->name('produk.store');
+    Route::get('/admin/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
+    Route::get('/admin/produk/{id}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
+    Route::put('/admin/produk/{id}', [ProdukController::class, 'update'])->name('produk.update');
+    Route::delete('/admin/produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+    
     Route::get('/admin/stok', fn() => view('admin.stok'));
     Route::get('/admin/pesanan', fn() => view('admin.pesananmasuk'));
     Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
@@ -24,5 +34,3 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
     Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));
 });
-
-
