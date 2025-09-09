@@ -11,6 +11,14 @@ Route::get('/', function () {
     return view('customer.pelanggan');
 });
 
+Route::get('/pesanan', function () {
+    return view('customer.pesanan');
+});
+
+Route::get('/konfirmasi', function () {
+    return view('customer.konfirmasi');
+});
+
 
 // Login Route
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
