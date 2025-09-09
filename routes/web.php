@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokController;
+use App\Http\Controllers\PesananController;
+
 
 Route::get('/', function () {
     return view('customer.pelanggan');
@@ -32,7 +34,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/stok', [StokController::class, 'index'])->name('stok.index');
     Route::put('/admin/stok/{id}', [StokController::class, 'update'])->name('stok.update');
 
-    Route::get('/admin/pesanan', fn() => view('admin.pesananmasuk'));
+    // Route::get('/admin/pesanan', fn() => view('admin.pesananmasuk'));
+    Route::get('/admin/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
+    Route::post('/admin/pesanan', [PesananController::class, 'store'])->name('pesanan.store');
+    Route::post('/admin/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.updateStatus');
+
+
     Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
     Route::get('/admin/laporan/mingguan', fn() => view('admin.laporanmingguan'));
     Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));

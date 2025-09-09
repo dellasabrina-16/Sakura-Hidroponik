@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('pesanans', function (Blueprint $table) {
             $table->id();
             $table->string('nama_pelanggan');
+            $table->date('tanggal_pesanan');
             $table->enum('jenis_pengambilan', ['diantar', 'ambil di kebun', 'ambil di rumah'])->default('diantar');
             $table->text('alamat');
             $table->string('no_whatsapp', 20);
             $table->integer('total_harga');
             $table->enum('status_pesanan', ['diproses', 'selesai', 'dibatalkan'])->default('diproses');
-            $table->string('alasan dibatalkan');
+            $table->string('alasan_dibatalkan')->nullable();
             $table->timestamps();
         });
     }
