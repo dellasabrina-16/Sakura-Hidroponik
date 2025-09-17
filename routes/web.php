@@ -9,7 +9,7 @@ use App\Http\Controllers\DashboardController;
 
 
 Route::get('/', function () {
-    return view('customer.pelanggan');
+    return view('customer.index');
 });
 
 Route::get('/pesanan', function () {

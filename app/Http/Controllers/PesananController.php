@@ -67,63 +67,57 @@ class PesananController extends Controller
             'produk.*.jumlah' => 'required|integer|min:1',
         ]);
 
+        // Cek stok dulu
+        foreach ($request->produk as $item) {
+            $produk = Produk::findOrFail($item['id']);
+            if ($produk->stok->stok_kg < $item['jumlah']) {
+                return back()
+                    ->withErrors(['stok' => "Stok {$produk->nama_produk} tidak mencukupi"])
+                    ->withInput()
+                    ->with('modal', 'tambah-pesanan'); // trigger modal tetap terbuka
+            }
+        }
+
         DB::transaction(function () use ($request) {
-            // Simpan pesanan
             $pesanan = Pesanan::create([
-                'nama_pelanggan'   => $request->nama_pelanggan,
-                'tanggal_pesanan'  => $request->tanggal_pesanan,
+                'nama_pelanggan' => $request->nama_pelanggan,
+                'tanggal_pesanan' => $request->tanggal_pesanan,
                 'jenis_pengambilan' => $request->jenis_pengambilan,
-                'alamat'           => $request->alamat,
-                'no_whatsapp'      => $request->no_whatsapp,
-                'total_harga'      => 0,
+                'alamat' => $request->alamat,
+                'no_whatsapp' => $request->no_whatsapp,
+                'total_harga' => 0,
             ]);
 
             $totalHarga = 0;
 
-            // Simpan detail produk
             foreach ($request->produk as $item) {
                 $produk = Produk::findOrFail($item['id']);
                 $jumlah = $item['jumlah'];
                 $harga = $produk->harga_kg * $jumlah;
 
-                // cek stok
-                $stok = $produk->stok;
-                if (!$stok || $stok->stok_kg < $jumlah) {
-                    return redirect()
-                        ->back()
-                        ->with('error', "Stok {$produk->nama_produk} tidak mencukupi")
-                        ->withInput(); // biar input tetap terisi
-                }
-
-
-                // simpan detail pesanan
                 $pesanan->details()->create([
                     'produk_id' => $produk->id,
-                    'nama_produk'      => $produk->nama_produk,
+                    'nama_produk' => $produk->nama_produk,
                     'harga_produk' => $produk->harga_kg,
                     'jumlah_kg' => $jumlah,
-                    'harga'     => $harga,
+                    'harga' => $harga,
                 ]);
 
-                // kurangi stok
-                $stok->decrement('stok_kg', $jumlah);
+                $produk->stok->decrement('stok_kg', $jumlah);
 
-                // cek lagi setelah dikurangi
-                if ($stok->stok_kg <= 0) {
-                    $stok->status = false;
-                    $stok->save();
+                if ($produk->stok->stok_kg <= 0) {
+                    $produk->stok->update(['status' => false]);
                 }
-
 
                 $totalHarga += $harga;
             }
 
-            // update total harga
             $pesanan->update(['total_harga' => $totalHarga]);
         });
 
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat!');
     }
+
 
     /**
      * Display the specified resource.
