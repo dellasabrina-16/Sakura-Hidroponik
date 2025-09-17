@@ -43,7 +43,7 @@ class ProdukController extends Controller
             'status' => $stokAwal > 0, // aktif kalau stok > 0
         ]);
 
-        return redirect()->back()->with('success', 'Produk & stok berhasil ditambahkan');
+        return redirect()->back()->with('success', 'Produk dan stok berhasil ditambahkan');
     }
 
     public function update(Request $request, string $id)
@@ -77,14 +77,31 @@ class ProdukController extends Controller
 
     public function destroy(string $id)
     {
-        $produk = Produk::findOrFail($id);
+        $produk = Produk::with('stok', 'detailsPesanan')->findOrFail($id);
 
+        // Cek apakah ada pesanan diproses yang masih menggunakan produk ini
+        $pesananDiproses = $produk->detailsPesanan()
+            ->whereHas('pesanan', function ($q) {
+                $q->where('status_pesanan', 'diproses');
+            })->exists();
+
+        if ($pesananDiproses) {
+            // Jika ada pesanan diproses, nonaktifkan stok saja
+            if ($produk->stok) {
+                $produk->stok->status = false;
+                $produk->stok->save();
+            }
+
+            return redirect()->back()->with('warning', 'Produk tidak bisa dihapus karena masih ada pesanan diproses. Produk dinonaktifkan.');
+        }
+
+        // Jika tidak ada pesanan diproses → hapus produk dan fotonya
         if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
             Storage::disk('public')->delete($produk->foto_produk);
         }
 
         $produk->delete();
 
-        return redirect()->back()->with('success', 'Produk berhasil dihapus');
+        return redirect()->back()->with('success', 'Produk berhasil dihapus.');
     }
 }

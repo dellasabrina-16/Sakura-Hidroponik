@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/', function () {
@@ -27,7 +28,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Route
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AuthController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Route::get('/admin/produk', fn() => view('admin.produk'));
     Route::get('/admin/produk', [ProdukController::class, 'index'])->name('produk.index');
@@ -48,7 +49,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.updateStatus');
 
 
-    Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
+    // Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
+    Route::get('/admin/pesananselesai', [PesananController::class, 'riwayatpesanan'])->name('pesanan.riwayat');
+    
     Route::get('/admin/laporan/mingguan', fn() => view('admin.laporanmingguan'));
     Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
     Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));

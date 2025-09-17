@@ -15,10 +15,32 @@ class PesananController extends Controller
      */
     public function index()
     {
-        $pesanans = Pesanan::with('details.produk')->latest()->get();
-        $produks = Produk::with('stok')->get();
+        $pesanans = Pesanan::with('details.produk')
+            ->where('status_pesanan', 'diproses')
+            ->orderBy('tanggal_pesanan', 'asc')
+            ->get();
+
+        $produks = Produk::whereHas('stok', function ($q) {
+            $q->where('status', true);
+        })->with('stok')->get();
+
 
         return view('admin/pesananmasuk', compact('pesanans', 'produks'));
+    }
+
+    public function riwayatpesanan()
+    {
+        $pesananSelesai = Pesanan::with('details.produk')
+            ->where('status_pesanan', 'selesai')
+            ->orderBy('tanggal_pesanan', 'desc')
+            ->get();
+
+        $pesananBatal = Pesanan::with('details.produk')
+            ->where('status_pesanan', 'dibatalkan')
+            ->orderBy('tanggal_pesanan', 'desc')
+            ->get();
+
+        return view('admin.pesananselesai', compact('pesananSelesai', 'pesananBatal'));
     }
 
     /**
@@ -67,18 +89,31 @@ class PesananController extends Controller
                 // cek stok
                 $stok = $produk->stok;
                 if (!$stok || $stok->stok_kg < $jumlah) {
-                    throw new \Exception("Stok {$produk->nama_produk} tidak mencukupi");
+                    return redirect()
+                        ->back()
+                        ->with('error', "Stok {$produk->nama_produk} tidak mencukupi")
+                        ->withInput(); // biar input tetap terisi
                 }
+
 
                 // simpan detail pesanan
                 $pesanan->details()->create([
                     'produk_id' => $produk->id,
+                    'nama_produk'      => $produk->nama_produk,
+                    'harga_produk' => $produk->harga_kg,
                     'jumlah_kg' => $jumlah,
                     'harga'     => $harga,
                 ]);
 
                 // kurangi stok
                 $stok->decrement('stok_kg', $jumlah);
+
+                // cek lagi setelah dikurangi
+                if ($stok->stok_kg <= 0) {
+                    $stok->status = false;
+                    $stok->save();
+                }
+
 
                 $totalHarga += $harga;
             }
@@ -111,18 +146,27 @@ class PesananController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $pesanan = Pesanan::findOrFail($id);
+        $pesanan = Pesanan::with('details.produk.stok')->findOrFail($id);
 
         $status = $request->input('status');
         $alasan = $request->input('alasan');
 
         // Validasi sederhana
-        if(!$status || !in_array($status, ['diproses','selesai','dibatalkan'])){
+        if (!$status || !in_array($status, ['diproses', 'selesai', 'dibatalkan'])) {
             return response()->json(['success' => false, 'message' => 'Status tidak valid'], 422);
         }
 
-        if($status === 'dibatalkan' && !$alasan){
+        if ($status === 'dibatalkan' && !$alasan) {
             return response()->json(['success' => false, 'message' => 'Alasan harus diisi'], 422);
+        }
+
+        // Kalau dibatalkan → kembalikan stok produk
+        if ($status === 'dibatalkan' && $pesanan->status_pesanan !== 'dibatalkan') {
+            foreach ($pesanan->details as $detail) {
+                if ($detail->produk && $detail->produk->stok) {
+                    $detail->produk->stok->increment('stok_kg', $detail->jumlah_kg);
+                }
+            }
         }
 
         // Update status dan alasan
@@ -132,6 +176,7 @@ class PesananController extends Controller
 
         return response()->json(['success' => true]);
     }
+
     /**
      * Remove the specified resource from storage.
      */

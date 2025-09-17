@@ -91,8 +91,8 @@
                 </thead>
                 <tbody>
                     @foreach ($pesanans as $i => $pesanan)
-                        <tr>
-                            <td class="text-center">{{ $i + 1 }}</td>
+                        <tr id="row-{{ $pesanan->id }}">
+                            <td class="text-center">{{ $loop->iteration }}</td>
                             <td class="text-center">{{ $pesanan->tanggal_pesanan }}</td>
                             <td>{{ $pesanan->nama_pelanggan }}</td>
                             <td>{{ $pesanan->details->count() }} produk</td>
@@ -105,10 +105,10 @@
                                     <div class="dropdown">
                                         <button
                                             class="badge 
-                @if ($pesanan->status_pesanan == 'diproses') bg-warning text-dark
-                @elseif($pesanan->status_pesanan == 'selesai') bg-success text-white
-                @elseif($pesanan->status_pesanan == 'dibatalkan') bg-danger text-white @endif
-                border-0 dropdown-toggle"
+                                                @if ($pesanan->status_pesanan == 'diproses') bg-warning text-dark
+                                                @elseif($pesanan->status_pesanan == 'selesai') bg-success text-white
+                                                @elseif($pesanan->status_pesanan == 'dibatalkan') bg-danger text-white @endif
+                                                border-0 dropdown-toggle"
                                             type="button" id="statusDropdown{{ $pesanan->id }}" data-bs-toggle="dropdown"
                                             aria-expanded="false">
                                             {{ ucfirst($pesanan->status_pesanan) }}
@@ -224,9 +224,9 @@
                                     <tbody>
                                         @foreach ($pesanan->details as $detail)
                                             <tr>
-                                                <td>{{ $detail->produk->nama_produk }}</td>
+                                                <td>{{ $detail->nama_produk }}</td>
                                                 <td class="text-end">{{ $detail->jumlah_kg }} x
-                                                    {{ number_format($detail->produk->harga_kg, 0, ',', '.') }}</td>
+                                                    {{ number_format($detail->harga_produk, 0, ',', '.') }}</td>
                                                 <td class="text-end">{{ number_format($detail->harga, 0, ',', '.') }}</td>
                                             </tr>
                                         @endforeach
@@ -319,17 +319,21 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>1</td>
+                                        <td class="no">1</td>
                                         <td>
                                             <select name="produk[0][id]" class="form-select produkSelect">
                                                 <option disabled selected>Pilih Produk</option>
                                                 @foreach ($produks as $produk)
-                                                    <option value="{{ $produk->id }}"
-                                                        data-harga="{{ $produk->harga_kg }}">
-                                                        {{ $produk->nama_produk }}
-                                                    </option>
+                                                    @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->status)
+                                                        <option value="{{ $produk->id }}"
+                                                            data-harga="{{ $produk->harga_kg }}">
+                                                            {{ $produk->nama_produk }} (Stok: {{ $produk->stok->stok_kg }}
+                                                            kg)
+                                                        </option>
+                                                    @endif
                                                 @endforeach
                                             </select>
+
                                         </td>
                                         <td><input type="number" name="produk[0][jumlah]"
                                                 class="form-control jumlahInput" min="1" value="1"></td>
@@ -433,27 +437,50 @@
                             if (modal) modal.hide();
                         }
 
-                        // Update badge status di tabel
-                        const badge = document.getElementById(`statusDropdown${orderId}`);
-                        badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                        badge.classList.remove("bg-warning", "bg-success", "bg-danger", "text-dark", "text-white");
+                        // Kalau status sudah bukan diproses → hapus row
+                        if (status !== "diproses") {
+                            const row = document.getElementById(`row-${orderId}`);
+                            if (row) row.remove();
+                        } else {
+                            // Update badge status kalau masih diproses
+                            const badge = document.getElementById(`statusDropdown${orderId}`);
+                            badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                            badge.classList.remove("bg-warning", "bg-success", "bg-danger", "text-dark", "text-white");
 
-                        if (status === "dibatalkan") {
-                            badge.classList.add("bg-danger", "text-white");
-                        } else if (status === "selesai") {
-                            badge.classList.add("bg-success", "text-white");
-                        } else if (status === "diproses") {
-                            badge.classList.add("bg-warning", "text-dark");
+                            if (status === "dibatalkan") {
+                                badge.classList.add("bg-danger", "text-white");
+                            } else if (status === "selesai") {
+                                badge.classList.add("bg-success", "text-white");
+                            } else if (status === "diproses") {
+                                badge.classList.add("bg-warning", "text-dark");
+                            }
                         }
 
-                        alert(`Status pesanan berhasil diubah menjadi ${status}.`);
+                        // ✅ SweetAlert sukses
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: `Status pesanan berhasil diubah menjadi ${status}.`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
                     } else {
-                        alert(data.message || "Gagal memperbarui status pesanan.");
+                        // ❌ SweetAlert error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || "Gagal memperbarui status pesanan."
+                        });
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    alert("Terjadi kesalahan, coba lagi.");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: "Terjadi kesalahan, coba lagi."
+                    });
                 });
         }
 
@@ -465,7 +492,11 @@
             const alasan = formData.get("alasan") === "Lainnya" ? formData.get("alasan_lainnya") : formData.get("alasan");
 
             if (!alasan) {
-                alert("Silakan pilih atau isi alasan pembatalan.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops!',
+                    text: 'Silakan pilih atau isi alasan pembatalan.'
+                });
                 return;
             }
 
@@ -533,5 +564,51 @@
             });
             document.getElementById('grandTotal').textContent = "Rp " + total.toLocaleString();
         }
+    </script>
+    <script>
+        function updateRowNumbers() {
+            document.querySelectorAll('#produkTable tbody tr').forEach((row, index) => {
+                row.querySelector('.no').textContent = index + 1;
+            });
+        }
+
+        // Panggil setiap kali tambah/hapus row
+        document.getElementById('addRow').addEventListener('click', () => {
+            // ... tambahkan row baru ...
+            updateRowNumbers();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('hapusRow')) {
+                e.target.closest('tr').remove();
+                updateRowNumbers();
+            }
+        });
+    </script>
+
+    <script>
+        @if (session('success'))
+            <
+            script >
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: '{{ session('success') }}',
+                    timer: 2000,
+                    showConfirmButton: false
+                }) <
+                />
+        @endif
+
+        @if (session('error'))
+            <
+            script >
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '{{ session('error') }}',
+                })
+    </>
+    @endif
     </script>
 @endsection

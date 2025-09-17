@@ -1,69 +1,75 @@
 @extends('master')
 
 @section('css')
-<style>
-    /* Ukuran font tabel & komponen DataTables */
-    #pesanans_selesai,
-    #pesanans_batal,
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        font-size: 0.8rem;
-    }
+    <style>
+        /* Ukuran font tabel & komponen DataTables */
+        #pesanans_selesai,
+        #pesanans_batal,
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 0.8rem;
+        }
 
-    /* Padding sel tabel */
-    #pesanans_selesai th,
-    #pesanans_selesai td,
-    #pesanans_batal th,
-    #pesanans_batal td {
-        padding: 0.5rem;
-    }
+        /* Padding sel tabel */
+        #pesanans_selesai th,
+        #pesanans_selesai td,
+        #pesanans_batal th,
+        #pesanans_batal td {
+            padding: 0.5rem;
+        }
 
-    /* Ukuran icon button di tabel */
-    #pesanans_selesai .btn .bx,
-    #pesanans_batal .btn .bx {
-        font-size: 1rem;
-    }
+        /* Ukuran icon button di tabel */
+        #pesanans_selesai .btn .bx,
+        #pesanans_batal .btn .bx {
+            font-size: 1rem;
+        }
 
-    /* Input pencarian DataTables */
-    .dataTables_wrapper .dataTables_filter input[type="search"] {
-        height: 25px;
-        font-size: 0.8rem;
-    }
+        /* Input pencarian DataTables */
+        .dataTables_wrapper .dataTables_filter input[type="search"] {
+            height: 25px;
+            font-size: 0.8rem;
+        }
 
-    /* Tombol hijau kecil */
-    #btnPrint, #btnExport {
-        background-color: #28a745; /* hijau tema */
-        border-color: #28a745;
-        color: #fff;
-    }
+        /* Tombol hijau kecil */
+        #btnPrint,
+        #btnExport {
+            background-color: #28a745;
+            /* hijau tema */
+            border-color: #28a745;
+            color: #fff;
+        }
 
-    #btnPrint:hover, #btnExport:hover {
-        background-color: #218838;
-        border-color: #1e7e34;
-    }
+        #btnPrint:hover,
+        #btnExport:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
 
-    /* Nav Tabs Hijau */
-    .nav-tabs .nav-link {
-        color: #155724; /* hijau gelap untuk tab tidak aktif */
-        background-color: #d4edda; /* hijau soft */
-        border: 1px solid #c3e6cb;
-        border-bottom-color: transparent;
-    }
+        /* Nav Tabs Hijau */
+        .nav-tabs .nav-link {
+            color: #155724;
+            /* hijau gelap untuk tab tidak aktif */
+            background-color: #d4edda;
+            /* hijau soft */
+            border: 1px solid #c3e6cb;
+            border-bottom-color: transparent;
+        }
 
-    .nav-tabs .nav-link.active {
-        color: #fff;
-        background-color: #28a745; /* hijau tema untuk tab aktif */
-        border-color: #28a745;
-        border-bottom-color: transparent;
-    }
+        .nav-tabs .nav-link.active {
+            color: #fff;
+            background-color: #28a745;
+            /* hijau tema untuk tab aktif */
+            border-color: #28a745;
+            border-bottom-color: transparent;
+        }
 
-    .nav-tabs .nav-link:hover {
-        background-color: #218838;
-        color: #fff;
-    }
-</style>
+        .nav-tabs .nav-link:hover {
+            background-color: #218838;
+            color: #fff;
+        }
+    </style>
 @endsection
 
 
@@ -125,6 +131,18 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach ($pesananSelesai as $pesanan)
+                                <tr id="row-{{ $pesanan->id }}">
+                                    <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td class="text-center">{{ $pesanan->tanggal_pesanan }}</td>
+                                    <td>{{ $pesanan->nama_pelanggan }}</td>
+                                    <td>{{ $pesanan->details->count() }} produk</td>
+                                    <td>{{ ucfirst($pesanan->jenis_pengambilan) }}</td>
+                                    <td>{{ $pesanan->alamat }}</td>
+                                    <td>{{ $pesanan->no_whatsapp }}</td>
+                                    <td class="text-end">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -148,6 +166,19 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach ($pesananBatal as $pesanan)
+                                <tr id="row-{{ $pesanan->id }}">
+                                    <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td class="text-center">{{ $pesanan->tanggal_pesanan }}</td>
+                                    <td>{{ $pesanan->nama_pelanggan }}</td>
+                                    <td>{{ $pesanan->details->count() }} produk</td>
+                                    <td>{{ ucfirst($pesanan->jenis_pengambilan) }}</td>
+                                    <td>{{ $pesanan->alamat }}</td>
+                                    <td>{{ $pesanan->no_whatsapp }}</td>
+                                    <td class="text-end">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                                    <td>{{ $pesanan->alasan_dibatalkan }}</td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

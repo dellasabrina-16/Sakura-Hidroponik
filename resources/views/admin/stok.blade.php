@@ -72,15 +72,16 @@
                                     </div>
 
                                     {{-- Badge kondisi stok --}}
-                                    @if (!$stok->status)
-                                        <span class="badge bg-secondary mt-1">Nonaktif</span>
-                                    @elseif($stok->stok_kg == 0)
+                                    @if ($stok->stok_kg == 0)
                                         <span class="badge bg-dark mt-1">Stok Habis</span>
-                                    @elseif($stok->stok_kg < 5)
+                                    @elseif (!$stok->status)
+                                        <span class="badge bg-secondary mt-1">Nonaktif</span>
+                                    @elseif ($stok->stok_kg < 5)
                                         <span class="badge bg-danger mt-1">Stok Sedikit</span>
                                     @else
                                         <span class="badge bg-success mt-1">Stok Aman</span>
                                     @endif
+
                                 </div>
                             </td>
 

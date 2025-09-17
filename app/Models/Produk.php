@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Stok;
+use App\Models\DetailPesanan;
 
 class Produk extends Model
 {
@@ -19,5 +21,11 @@ class Produk extends Model
     public function stok()
     {
         return $this->hasOne(Stok::class, 'produk_id');
+    }
+
+    // di Produk.php
+    public function detailsPesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'produk_id');
     }
 }

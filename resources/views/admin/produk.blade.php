@@ -95,17 +95,20 @@
 
                             {{-- Badge status stok --}}
                             <td class="text-center">
-                                @if ($produk->stok && $produk->stok->status)
+                                @if ($produk->stok && $produk->stok->stok_kg == 0)
+                                    <span class="badge bg-dark">Stok Habis</span>
+                                @elseif ($produk->stok && $produk->stok->status)
                                     <span class="badge bg-success">Aktif</span>
                                 @else
                                     <span class="badge bg-secondary">Nonaktif</span>
                                 @endif
                                 <br>
                                 {{-- Badge stok rendah --}}
-                                @if ($produk->stok && $produk->stok->stok_kg < 5 && $produk->stok->status)
+                                @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->stok_kg < 5 && $produk->stok->status)
                                     <span class="badge bg-danger">Stok Rendah</span>
                                 @endif
                             </td>
+
 
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
@@ -156,7 +159,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi_produk" class="form-control" rows="3"></textarea>
+                            <textarea name="deskripsi_produk" class="form-control" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Harga per Kg</label>
@@ -259,6 +262,16 @@
                 icon: 'error',
                 title: 'Gagal!',
                 text: "{{ session('error') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if (session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan!',
+                text: "{{ session('warning') }}",
                 timer: 2000,
                 showConfirmButton: false
             });
