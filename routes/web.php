@@ -6,6 +6,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
 
 Route::get('/', function () {
@@ -19,6 +20,8 @@ Route::get('/pesanan', function () {
 Route::get('/konfirmasi', function () {
     return view('customer.konfirmasi');
 });
+
+
 
 
 // Login Route
@@ -51,8 +54,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
     Route::get('/admin/pesananselesai', [PesananController::class, 'riwayatpesanan'])->name('pesanan.riwayat');
-    
+
     Route::get('/admin/laporan/mingguan', fn() => view('admin.laporanmingguan'));
     Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
     Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));
+
+    // Route Profile
+    Route::get('/admin/profile', [ProfileController::class, 'index'])->name('profile.index');
 });
