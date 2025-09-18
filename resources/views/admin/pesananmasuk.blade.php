@@ -278,32 +278,39 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Nama Pelanggan</label>
-                                    <input type="text" name="nama_pelanggan" class="form-control" required>
+                                    <input type="text" name="nama_pelanggan"
+                                        class="form-control"
+                                        value="{{ old('nama_pelanggan') }}" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tanggal Pesanan</label>
-                                    <input type="date" name="tanggal_pesanan" class="form-control" required>
+                                    <input type="date" name="tanggal_pesanan"
+                                        class="form-control"
+                                        value="{{ old('tanggal_pesanan') }}" required>
                                 </div>
                             </div>
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Nomor WhatsApp</label>
-                                    <input type="text" name="no_whatsapp" class="form-control" required>
+                                    <input type="text" name="no_whatsapp"
+                                        class="form-control"
+                                        value="{{ old('no_whatsapp') }}" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Metode Pengambilan</label>
                                     <select name="jenis_pengambilan" class="form-select" required>
-                                        <option value="diantar">Diantar</option>
-                                        <option value="ambil di kebun">Ambil di Kebun</option>
-                                        <option value="ambil di rumah">Ambil di Rumah</option>
+                                        <option disabled {{ old('jenis_pengambilan') ? '' : 'selected' }}>Pilih Metode</option>
+                                        <option value="diantar" {{ old('jenis_pengambilan') == 'diantar' ? 'selected' : '' }}>Diantar</option>
+                                        <option value="ambil di kebun" {{ old('jenis_pengambilan') == 'ambil di kebun' ? 'selected' : '' }}>Ambil di Kebun</option>
+                                        <option value="ambil di rumah" {{ old('jenis_pengambilan') == 'ambil di rumah' ? 'selected' : '' }}>Ambil di Rumah</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Alamat</label>
-                                <textarea name="alamat" class="form-control" rows="2"></textarea>
+                                <textarea name="alamat" class="form-control" rows="2">{{ old('alamat') }}</textarea>
                             </div>
 
                             <h6 class="fw-bold mb-2">Detail Produk</h6>
@@ -318,33 +325,40 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $oldProduk = old('produk', [['id' => null, 'jumlah' => 1]]);
+                                    @endphp
+
+                                    @foreach ($oldProduk as $i => $p)
                                     <tr>
-                                        <td class="no">1</td>
+                                        <td class="no">{{ $loop->iteration }}</td>
                                         <td>
-                                            <select name="produk[0][id]" class="form-select produkSelect">
-                                                <option disabled selected>Pilih Produk</option>
+                                            <select name="produk[{{ $i }}][id]" class="form-select produkSelect" required>
+                                                <option disabled {{ $p['id'] ? '' : 'selected' }}>Pilih Produk</option>
                                                 @foreach ($produks as $produk)
                                                     @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->status)
                                                         <option value="{{ $produk->id }}"
-                                                            data-harga="{{ $produk->harga_kg }}">
-                                                            {{ $produk->nama_produk }} (Stok: {{ $produk->stok->stok_kg }}
-                                                            kg)
+                                                            data-harga="{{ $produk->harga_kg }}"
+                                                            {{ $p['id'] == $produk->id ? 'selected' : '' }}>
+                                                            {{ $produk->nama_produk }} (Stok: {{ $produk->stok->stok_kg }} kg)
                                                         </option>
                                                     @endif
                                                 @endforeach
                                             </select>
-
                                         </td>
-                                        <td><input type="number" name="produk[0][jumlah]"
-                                                class="form-control jumlahInput" min="1" value="1"></td>
+                                        <td>
+                                            <input type="number" name="produk[{{ $i }}][jumlah]"
+                                                class="form-control jumlahInput"
+                                                min="1"
+                                                value="{{ $p['jumlah'] }}">
+                                        </td>
                                         <td class="text-end subtotal">Rp 0</td>
-                                        <td><button type="button" class="btn btn-danger btn-sm hapusRow">Hapus</button>
-                                        </td>
+                                        <td><button type="button" class="btn btn-danger btn-sm hapusRow">Hapus</button></td>
                                     </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">+ Tambah
-                                Produk</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">+ Tambah Produk</button>
 
                             <div class="text-end mt-3 fw-bold">
                                 Total: <span id="grandTotal">Rp 0</span>
@@ -354,9 +368,8 @@
                                 <button type="submit" class="btn btn-hijau">Simpan</button>
                             </div>
                         </form>
+
                     </div>
-
-
                 </div>
             </div>
         </div>
@@ -585,6 +598,18 @@
             }
         });
     </script>
+
+    @if(session('modal') === 'tambah-pesanan' || $errors->has('stok'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: "{{ $errors->first('stok') }}"
+        }).then(() => {
+            $('#ModalTambahPesanan').modal('show'); // modal tetap terbuka
+        });
+    </script>
+    @endif
 
     <script>
         @if (session('success'))
