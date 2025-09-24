@@ -4,7 +4,7 @@
     <div class="pagetitle">
         <h1>Dashboard</h1>
         <nav>
-            <ol class="breadcrumb">
+            <ol class="breadcrumb ">
                 <li class="breadcrumb-item"><a>Lihat ringkasan mingguan omzet, status stok terkini, dan daftar
                         pesanan yang belum terpenuhi.</a></li>
             </ol>
