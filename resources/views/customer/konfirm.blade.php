@@ -59,7 +59,7 @@
 
                 <div class="d-flex ms-auto">
                     <a href="#" class="position-relative text-end my-auto">
-                        <i class="fas fa-shopping-bag fa-2x"></i>
+                        <i class="fa fa-shopping-bag fa-2x"></i>
                         <span
                             class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
                             style="top: -5px; xleft: 15px; height: 20px; min-width: 20px;">3</span>
@@ -86,40 +86,31 @@
     <div class="container-fluid py-5">
         <div class="container py-5">
             <h1 class="mb-4">Lengkapi Data Pesanan Anda</h1>
-            <form id="checkout-form" action="{{ route('konfirmasi.store') }}" method="POST">
-                @csrf
+            <form action="#">
                 <div class="row g-5">
                     <div class="col-md-12 col-lg-6 col-xl-7">
                         <div class="form-item mb-3">
                             <label class="form-label">Nama</label>
-                            <input type="text" name="nama_pelanggan" class="form-control"
-                                value="{{ old('nama_pelanggan') }}" placeholder="Masukkan nama" required>
+                            <input type="text" class="form-control" placeholder="Masukkan nama" />
                         </div>
 
                         <div class="form-item mb-3">
-                            <label class="form-label">Nomor WhatsApp</label>
-                            <input type="text" name="no_whatsapp" class="form-control"
-                                value="{{ old('no_whatsapp') }}" placeholder="Masukkan nomor WhatsApp" required>
+                            <label class="form-label">No WhatsApp</label>
+                            <input type="tel" class="form-control" placeholder="Masukkan nomor WhatsApp" />
                         </div>
 
                         <div class="form-item mb-3">
-                            <label class="form-label">Metode Pengambilan</label>
-                            <select name="jenis_pengambilan" class="form-select" required>
-                                <option disabled {{ old('jenis_pengambilan') ? '' : 'selected' }}>Pilih Metode</option>
-                                <option value="diantar" {{ old('jenis_pengambilan') == 'diantar' ? 'selected' : '' }}>
-                                    Diantar</option>
-                                <option value="ambil di kebun"
-                                    {{ old('jenis_pengambilan') == 'ambil di kebun' ? 'selected' : '' }}>Ambil di Kebun
-                                </option>
-                                <option value="ambil di rumah"
-                                    {{ old('jenis_pengambilan') == 'ambil di rumah' ? 'selected' : '' }}>Ambil di Rumah
-                                </option>
+                            <label class="form-label">Opsi Pengiriman / Pengambilan</label>
+                            <select class="form-select">
+                                <option selected disabled>Pilih opsi</option>
+                                <option value="antar">Antar ke alamat</option>
+                                <option value="ambil">Ambil di tempat</option>
                             </select>
                         </div>
 
                         <div class="form-item mb-3">
                             <label class="form-label">Alamat</label>
-                            <textarea name="alamat" class="form-control" rows="4">{{ old('alamat') }}</textarea>
+                            <textarea class="form-control" rows="4" placeholder="Masukkan alamat lengkap"></textarea>
                         </div>
                     </div>
 
@@ -128,33 +119,62 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th scope="col">Produk</th>
-                                        <th scope="col">Nama</th>
-                                        <th scope="col">Harga</th>
-                                        <th scope="col">Jumlah</th>
+                                        <th scope="col">Products</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Quantity</th>
                                         <th scope="col">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @foreach ($keranjang as $item)
+                                <tbody id="cart-body">
+                                    @php $grandTotal = 0; @endphp
+                                    @if (session('cart'))
+                                        @foreach (session('cart') as $id => $item)
+                                            @php
+                                                $total = $item['harga'] * $item['jumlah'];
+                                                $grandTotal += $total;
+                                            @endphp
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="d-flex align-items-center mt-2">
+                                                        <img src="{{ asset('img/' . $item['gambar']) }}"
+                                                            class="img-fluid rounded-circle"
+                                                            style="width: 90px; height: 90px"
+                                                            alt="{{ $item['nama'] }}" />
+                                                    </div>
+                                                </th>
+                                                <td class="py-5">{{ $item['nama'] }}</td>
+                                                <td class="py-5">Rp{{ number_format($item['harga'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="py-5">{{ $item['jumlah'] }}</td>
+                                                <td class="py-5">Rp{{ number_format($total, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
                                         <tr>
-                                            <td><img src="{{ $item['gambar'] }}" width="80"></td>
-                                            <td>{{ $item['nama'] }}</td>
-                                            <td>Rp{{ number_format($item['harga'], 0, ',', '.') }}</td>
-                                            <td class="text-center">{{ $item['jumlah'] }}</td>
-                                            <td>Rp{{ number_format($item['harga'] * $item['jumlah'], 0, ',', '.') }}
+                                            <td colspan="4" class="py-5 text-end">
+                                                <p class="mb-0 text-dark text-uppercase py-3">TOTAL</p>
+                                            </td>
+                                            <td class="py-5">
+                                                <div class="py-3 border-bottom border-top">
+                                                    <p class="mb-0 text-dark">
+                                                        Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
+                                                </div>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">Keranjang masih kosong</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
+
                             </table>
                         </div>
                         <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                            <button type="submit"
+                            <button type="button"
                                 class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">
                                 Pesan Sekarang
                             </button>
-
                         </div>
                     </div>
                 </div>
@@ -213,36 +233,44 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Tambahkan script JS Ajax -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}
     <script>
-        $(document).ready(function() {
-            $("#checkout-form").on("submit", function(e) {
-                e.preventDefault();
+        document.addEventListener("DOMContentLoaded", function() {
+            // tombol hapus barang
+            document.querySelectorAll(".hapus-item").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let tr = this.closest("tr");
+                    let productName = tr.querySelector("td").innerText;
 
-                $.ajax({
-                    url: $(this).attr("action"),
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Pesanan Berhasil!",
-                                html: "Terima kasih, pesananmu telah kami terima.<br><b>Tunggu info selanjutnya melalui WhatsApp, ya!</b>",
-                                confirmButtonText: "Ok"
-                            }).then(() => {
-                                window.location.href = res
-                                .redirect; // redirect ke index
-                            });
-                        } else {
-                            Swal.fire("Gagal!", res.message, "error");
+                    Swal.fire({
+                        title: "Apakah kamu yakin?",
+                        text: productName + " akan dihapus dari keranjang!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Ya, hapus!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            tr.remove(); // hapus row di tabel (frontend)
+
+                            Swal.fire(
+                                "Terhapus!",
+                                productName + " sudah dihapus dari keranjang.",
+                                "success"
+                            );
                         }
-                    },
-                    error: function(xhr) {
-                        Swal.fire("Error!", xhr.responseJSON?.message || "Terjadi kesalahan.",
-                            "error");
-                    }
+                    });
+                });
+            });
+
+            // contoh ketika checkout
+            document.getElementById("checkoutBtn")?.addEventListener("click", function() {
+                Swal.fire({
+                    title: "Checkout Berhasil!",
+                    text: "Pesanan kamu sedang diproses.",
+                    icon: "success",
+                    confirmButtonText: "OK"
                 });
             });
         });
@@ -251,4 +279,3 @@
 </body>
 
 </html>
-`

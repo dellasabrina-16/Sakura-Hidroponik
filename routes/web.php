@@ -7,21 +7,20 @@ use App\Http\Controllers\StokController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerKeranjangController;
+use App\Http\Controllers\CustomerPesananController;
 
 
-Route::get('/', function () {
-    return view('customer.index');
-});
+Route::get('/', [CustomerController::class, 'index'])->name('landingpage');
 
-Route::get('/pesanan', function () {
-    return view('customer.pesanan');
-});
+Route::get('/keranjang', [CustomerKeranjangController::class, 'index'])->name('keranjang.index');
+Route::post('/keranjang/add', [CustomerKeranjangController::class, 'add'])->name('keranjang.add');
+Route::post('/keranjang/update', [CustomerKeranjangController::class, 'update'])->name('keranjang.update');
+Route::post('/keranjang/remove', [CustomerKeranjangController::class, 'remove'])->name('keranjang.remove');
 
-Route::get('/konfirmasi', function () {
-    return view('customer.konfirmasi');
-});
-
-
+Route::get('/konfirmasi', [CustomerPesananController::class, 'index'])->name('konfirmasi.index');
+Route::post('/customer/pesan', [CustomerPesananController::class, 'store'])->name('konfirmasi.store');
 
 
 // Login Route
