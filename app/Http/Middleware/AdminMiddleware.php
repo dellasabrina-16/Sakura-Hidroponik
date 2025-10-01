@@ -16,10 +16,15 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'admin') {
-            return $next($request);
+        if (!Auth::check()) {
+            return redirect('/login');
         }
-        
-        return redirect('/login')->with('error', 'Hanya admin yang bisa mengakses halaman ini');
+
+        if (Auth::user()->role !== 'admin') {
+            return redirect('/login')->with('error', 'Hanya admin yang bisa mengakses halaman ini');
+        }
+
+        return $next($request);
     }
+
 }

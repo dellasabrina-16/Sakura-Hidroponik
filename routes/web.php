@@ -58,6 +58,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
     Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));
 
-    // Route Profile
-    Route::get('/admin/profile', [ProfileController::class, 'index'])->name('profile.index');
+    // Route::get('/admin/profile', [AuthController::class, 'profile'])
+    //     ->name('profile')
+    //     ->middleware('auth');
+
+    // Route::post('/admin/profile/update', [AuthController::class, 'updateProfile'])
+    //     ->name('profile.update')
+    //     ->middleware('auth');
+
 });
