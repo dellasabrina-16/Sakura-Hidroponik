@@ -22,10 +22,15 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
 
-            // Pastikan token disimpan di database
-            if ($remember) {
-                Auth::user()->setRememberToken(Str::random(60));
-                Auth::user()->save();
+            if (!$remember) {
+                // ✅ Session hanya berlaku sampai browser ditutup total
+                config(['session.expire_on_close' => true]);
+                // ✅ Batas waktu session bisa dibuat pendek
+                config(['session.lifetime' => 1]); // expired dalam 1 menit idle
+            } else {
+                // ✅ Jika Remember Me → simpan sampai waktu lifetime default (120 menit atau lebih)
+                config(['session.expire_on_close' => false]);
+                config(['session.lifetime' => 120]);
             }
 
             $request->session()->regenerate();
@@ -38,9 +43,10 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Hanya admin yang bisa login']);
         }
 
-
         return back()->withErrors(['email' => 'Email atau password salah']);
     }
+
+
 
     // Dashboard admin (admin/dashboard.blade.php)
     public function dashboard()
