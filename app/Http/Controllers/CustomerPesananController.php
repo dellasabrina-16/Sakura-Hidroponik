@@ -6,6 +6,7 @@ use App\Models\Produk;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use GuzzleHttp\Client;
 
 class CustomerPesananController extends Controller
 {
@@ -31,6 +32,8 @@ class CustomerPesananController extends Controller
         ]);
 
         try {
+            $pesanan = null;
+
             DB::transaction(function () use ($request, $keranjang, &$pesanan) {
                 $pesanan = Pesanan::create([
                     'nama_pelanggan' => $request->nama_pelanggan,
@@ -71,11 +74,43 @@ class CustomerPesananController extends Controller
 
                 $pesanan->update(['total_harga' => $totalHarga]);
                 session()->forget('keranjang');
+
+                // ✅ Kirim pesan WhatsApp ke pelanggan setelah pesanan dibuat
+                $pesan = "*Sakura Hidroponik*\n\n" .
+                    "Halo {$pesanan->nama_pelanggan},\n" .
+                    "Pesanan kamu telah kami terima ✅\n\n" .
+                    "Tanggal: {$pesanan->tanggal_pesanan}\n" .
+                    "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
+                    "Kami akan segera memproses pesananmu 🙏";
+
+                $this->sendWa($pesanan->no_whatsapp, $pesan);
             });
 
             return response()->json(['success' => true, 'redirect' => route('landingpage')]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function sendWa($no_hp, $pesan)
+    {
+        $client = new Client();
+        $url = 'https://apiwa.smkpgriwlingi.sch.id/api/sendBulkMessage';
+
+        try {
+            $response = $client->post($url, [
+                'form_params' => [
+                    'apiKey' => '3d36e250d0b4d2fca5cada2d66c0c408', // ganti jika token berubah
+                    'phone' => json_encode([$no_hp]),
+                    'message' => $pesan,
+                    'delay' => 1
+                ]
+            ]);
+
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            \Log::error('Gagal kirim WA: ' . $e->getMessage());
+            return false;
         }
     }
 }

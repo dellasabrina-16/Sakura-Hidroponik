@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
-use App\Models\DetailPesanan;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use GuzzleHttp\Client;
 
 class PesananController extends Controller
 {
@@ -23,7 +23,6 @@ class PesananController extends Controller
         $produks = Produk::whereHas('stok', function ($q) {
             $q->where('status', true);
         })->with('stok')->get();
-
 
         return view('admin/pesananmasuk', compact('pesanans', 'produks'));
     }
@@ -43,9 +42,6 @@ class PesananController extends Controller
         return view('admin.pesananselesai', compact('pesananSelesai', 'pesananBatal'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
@@ -113,23 +109,26 @@ class PesananController extends Controller
             }
 
             $pesanan->update(['total_harga' => $totalHarga]);
+
+            // ✅ Kirim pesan WhatsApp ke pelanggan setelah pesanan dibuat
+            $pesan = "*Sakura Hidroponik*\n\n".
+                "Halo {$pesanan->nama_pelanggan},\n".
+                "Pesanan kamu telah kami terima ✅\n\n".
+                "Tanggal: {$pesanan->tanggal_pesanan}\n".
+                "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n".
+                "Kami akan segera memproses pesananmu 🙏";
+            
+            $this->sendWa($pesanan->no_whatsapp, $pesan);
         });
 
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat!');
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
@@ -168,14 +167,48 @@ class PesananController extends Controller
         $pesanan->alasan_dibatalkan = $status === 'dibatalkan' ? $alasan : null;
         $pesanan->save();
 
+        // ✅ Kirim pesan WhatsApp saat status berubah
+        $pesan = "*Sakura Hidroponik*\n\n".
+            "Halo {$pesanan->nama_pelanggan},\n".
+            "Status pesanan kamu telah diperbarui 📨\n\n".
+            "Status sekarang: *" . strtoupper($status) . "*\n";
+
+        if ($status === 'dibatalkan') {
+            $pesan .= "Alasan pembatalan: {$alasan}\n\n";
+        }
+
+        $pesan .= "Terima kasih telah berbelanja di Sakura Hidroponik 💚";
+
+        $this->sendWa($pesanan->no_whatsapp, $pesan);
+
         return response()->json(['success' => true]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //
+    }
+
+    // ✅ Tambahkan fungsi kirim WhatsApp di bawah controller ini
+    private function sendWa($no_hp, $pesan)
+    {
+        $client = new Client();
+        $url = 'https://apiwa.smkpgriwlingi.sch.id/api/sendBulkMessage';
+
+        try {
+            $response = $client->post($url, [
+                'form_params' => [
+                    'apiKey'  => '3d36e250d0b4d2fca5cada2d66c0c408', // ganti jika token berubah
+                    'phone'   => json_encode([$no_hp]),
+                    'message' => $pesan,
+                    'delay'   => 1
+                ]
+            ]);
+
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            \Log::error('Gagal kirim WA: ' . $e->getMessage());
+            return false;
+        }
     }
 }
