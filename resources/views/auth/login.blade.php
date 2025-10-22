@@ -74,12 +74,14 @@
                                         <p class="small">Silahkan masuk ke akun anda</p>
                                     </div>
 
-                                    <form class="row g-3 needs-validation" method="POST" action="/login" novalidate>
+                                    <form class="row g-3 needs-validation" method="POST"
+                                        action="{{ route('login.post') }}" novalidate>
                                         @csrf
                                         <!-- Email / Username -->
                                         <div class="col-12">
                                             <label for="email" class="form-label">Email / Username</label>
-                                            <input type="email" name="email" class="form-control" id="email"
+                                            <input type="email" class="form-control" name="email" placeholder="Email"
+                                                value="{{ old('email') }}"
                                                 placeholder="Masukkan email atau nama pengguna" required>
                                         </div>
 
@@ -90,6 +92,7 @@
                                                 <a href="#" class="small text-muted">Lupa Sandi?</a>
                                             </div>
                                             <div class="input-group">
+                                                <!-- <input type="password" name="password" placeholder="Password" required> -->
                                                 <input type="password" name="password" id="password"
                                                     class="form-control" placeholder="Masukkan kata sandi" required>
                                                 <button class="btn btn-outline-secondary" type="button"
@@ -101,17 +104,19 @@
 
                                         <!-- Remember Me -->
                                         <div class="col-12">
-                                            <div class="form-check">
+                                            <div class="remember form-check">
                                                 <input class="form-check-input" type="checkbox" name="remember"
-                                                    id="rememberMe">
-                                                <label class="form-check-label" for="rememberMe">Ingatkan Saya</label>
+                                                    id="remember">
+                                                <label class="form-check-label" for="rememberMe">Ingat Saya</label>
                                             </div>
 
                                         </div>
-
+                                        @error('email')
+                                            <p style="color:red;">{{ $message }}</p>
+                                        @enderror
                                         <!-- Submit -->
                                         <div class="col-12">
-                                            <button class="btn btn-hijau w-100" type="submit">Login</button>
+                                            <button class="btn btn-hijau w-100" type="submit">Masuk</button>
                                         </div>
                                     </form>
 

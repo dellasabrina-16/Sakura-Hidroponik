@@ -4,62 +4,45 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    // Menampilkan form login (admin/login.blade.php)
     public function showLoginForm()
     {
-        return view('admin.login');
-    }
-
-    // Proses login
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
-        $remember = $request->has('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
-
-            if (!$remember) {
-                // ✅ Session hanya berlaku sampai browser ditutup total
-                config(['session.expire_on_close' => true]);
-                // ✅ Batas waktu session bisa dibuat pendek
-                config(['session.lifetime' => 1]); // expired dalam 1 menit idle
-            } else {
-                // ✅ Jika Remember Me → simpan sampai waktu lifetime default (120 menit atau lebih)
-                config(['session.expire_on_close' => false]);
-                config(['session.lifetime' => 120]);
-            }
-
-            $request->session()->regenerate();
-
-            if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            }
-
-            Auth::logout();
-            return back()->withErrors(['email' => 'Hanya admin yang bisa login']);
+        // Jika sudah login (termasuk remember me), redirect ke dashboard
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah']);
+        return view('auth.login');
     }
 
-
-
-    // Dashboard admin (admin/dashboard.blade.php)
-    public function dashboard()
+    public function login(Request $request)
     {
-        return view('admin.dashboard');
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        $remember = $request->filled('remember');
+
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/admin');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
     }
 
-    // Logout
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/login');
     }
 }

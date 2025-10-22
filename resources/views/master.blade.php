@@ -64,10 +64,10 @@
 
                 <li class="nav-item dropdown pe-3">
 
-                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
-                        data-bs-toggle="dropdown">
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                         <img src="{{ asset('assets/img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
-                        <span class="d-none d-md-block dropdown-toggle ps-2">Admin</span>
+                        <span
+                            class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::guard('admin')->user()->name }}</span>
                     </a>
                     <!-- End Profile Iamge Icon -->
 
@@ -83,10 +83,18 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="/login">
+                            <!-- Tombol logout di dropdown -->
+                            <a class="dropdown-item d-flex align-items-center" href="#"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span>Sign Out</span>
                             </a>
+
+                            <!-- Form logout tersembunyi -->
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+
                         </li>
 
                     </ul>
@@ -159,8 +167,7 @@
 
             <!-- Stok -->
             <li class="nav-item">
-                <a class="nav-link {{ Request::is('admin/stok*') ? '' : 'collapsed' }}"
-                    href="{{ url('/admin/stok') }}">
+                <a class="nav-link {{ Request::is('admin/stok*') ? '' : 'collapsed' }}" href="{{ url('/admin/stok') }}">
                     <i class="bi bi-card-checklist"></i>
                     <span>Stok</span>
                 </a>

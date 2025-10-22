@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerKeranjangController;
 use App\Http\Controllers\CustomerPesananController;
+use App\Http\Middleware\PreventBackHistory;
 
 
 Route::get('/', [CustomerController::class, 'index'])->name('landingpage');
@@ -24,12 +25,15 @@ Route::post('/customer/pesan', [CustomerPesananController::class, 'store'])->nam
 
 
 // Login Route
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login', [AuthController::class, 'showLoginForm'])
+    ->name('login')
+    ->middleware('guest:admin');
+
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Route
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth:admin', PreventBackHistory::class])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Route::get('/admin/produk', fn() => view('admin.produk'));
