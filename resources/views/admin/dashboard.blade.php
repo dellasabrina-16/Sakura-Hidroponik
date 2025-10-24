@@ -214,3 +214,22 @@
         </div>
     </section>
 @endsection
+
+@section('script')
+    <!-- <script>
+        console.log("Script section loaded");
+    </script> -->
+
+    @if (session('login.success'))
+        <script>
+            // console.log("Session login_success detected");
+            Swal.fire({
+                title: 'Login Berhasil!',
+                text: 'Selamat datang di Sakura Hidroponik 🌿',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1000,
+            });
+        </script>
+    @endif
+@endsection
