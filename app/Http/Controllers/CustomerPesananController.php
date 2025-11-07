@@ -28,7 +28,7 @@ class CustomerPesananController extends Controller
             'nama_pelanggan' => 'required|string|max:255',
             'no_whatsapp' => 'required|string|max:20',
             'jenis_pengambilan' => 'required|string',
-            'alamat' => 'required|string',
+            'alamat' => 'required_if:jenis_pengambilan,diantar|string|nullable',
         ]);
 
         try {
@@ -39,7 +39,7 @@ class CustomerPesananController extends Controller
                     'nama_pelanggan' => $request->nama_pelanggan,
                     'tanggal_pesanan' => now(),
                     'jenis_pengambilan' => $request->jenis_pengambilan,
-                    'alamat' => $request->alamat,
+                    'alamat' => $request->jenis_pengambilan === 'diantar' ? $request->alamat : '-',
                     'no_whatsapp' => $request->no_whatsapp,
                     'total_harga' => 0,
                 ]);

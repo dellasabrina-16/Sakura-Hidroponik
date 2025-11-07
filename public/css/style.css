@@ -1,3 +1,38 @@
+.featurs .row {
+    align-items: stretch; /* Bikin tinggi tiap col sama */
+}
+
+.featurs-item {
+    height: 100%; /* Penuhi tinggi kolom */
+}
+
+/* Card Produk Seragam */
+.fruite-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.fruite-item .fruite-img {
+    flex-shrink: 0;
+}
+
+.fruite-item .p-4 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.deskripsi-produk {
+    min-height: 40px; /* agar ada ruang meski deskripsi kosong */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* maksimal 2 baris */
+    -webkit-box-orient: vertical;
+    font-size: 0.9rem;
+}
 
 /*** Spinner Start ***/
 #spinner {

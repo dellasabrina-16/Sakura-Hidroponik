@@ -27,11 +27,78 @@
             color: #fff;
         }
 
-        .badge-stok {
-            background-color: #ffc107;
-            color: #000;
-            font-size: 0.75rem;
-            margin-left: 5px;
+        /* Button group stok */
+        .stok-group .btn {
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: none;
+            transition: all 0.3s ease;
+            padding: 0.4rem 0.8rem;
+        }
+
+        /* Tombol stok utama (menampilkan jumlah stok) */
+        .btn-stok {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-stok:hover {
+            background: linear-gradient(135deg, #dcedc8, #e8f5e9);
+            transform: scale(1.03);
+            color: #2e7d32;
+        }
+
+        /* Tombol tambah stok */
+        .btn-tambah-stok {
+            background: linear-gradient(135deg, #43a047, #66bb6a);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-tambah-stok:hover {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            transform: scale(1.03);
+            color: #fff;
+        }
+
+        /* Tambahan bayangan halus untuk keseluruhan grup */
+        .stok-group {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+
+        .stok-group .btn:first-child {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+
+        .stok-group .btn:last-child {
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+
+
+        .badge.bg-success {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+        }
+
+        .badge.bg-danger {
+            background: linear-gradient(135deg, #e57373, #ef5350);
+        }
+
+        .badge.bg-dark {
+            background: linear-gradient(135deg, #757575, #424242);
+        }
+
+        .badge.bg-secondary {
+            background: linear-gradient(135deg, #bdbdbd, #9e9e9e);
         }
     </style>
 @endsection
@@ -55,7 +122,6 @@
                         <th>Nama Produk</th>
                         <th class="text-center">Stok per Kg</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,7 +129,18 @@
                         <tr data-id="{{ $stok->id }}">
                             <td class="text-center">{{ $loop->iteration }}</td>
                             <td>{{ $stok->produk->nama_produk }}</td>
-                            <td class="text-center stok-kg">{{ $stok->stok_kg }} Kg</td>
+                            <td class="text-center stok-kg">
+                                <div class="btn-group stok-group" role="group" aria-label="Stok button group">
+                                    <button type="button" class="btn btn-stok">
+                                        {{ $stok->stok_kg }} Kg
+                                    </button>
+                                    <button type="button" class="btn btn-tambah-stok btn-tambah" data-bs-toggle="modal"
+                                        data-bs-target="#modalTambahStok" data-nama="{{ $stok->produk->nama_produk }}"
+                                        data-id="{{ $stok->id }}">
+                                        <i class="bi bi-plus-circle me-1"></i> Tambah
+                                    </button>
+                                </div>
+                            </td>
                             <td class="text-center">
                                 <div class="d-flex flex-column align-items-center">
                                     <div class="form-check form-switch">
@@ -83,15 +160,6 @@
                                     @endif
 
                                 </div>
-                            </td>
-
-
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-hijau btn-tambah" data-bs-toggle="modal"
-                                    data-bs-target="#modalTambahStok" data-nama="{{ $stok->produk->nama_produk }}"
-                                    data-id="{{ $stok->id }}">
-                                    Tambah Stok
-                                </button>
                             </td>
                         </tr>
                     @endforeach

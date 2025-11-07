@@ -19,10 +19,10 @@ class ProdukController extends Controller
     {
         $validated = $request->validate([
             'nama_produk' => 'required|string|max:255',
-            'deskripsi_produk' => 'nullable|string',
-            'harga_kg' => 'required|integer|min:1',
+            'foto_produk' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'deskripsi_produk' => 'required|string|min:20|max:100',
+            'harga_kg' => 'required|numeric|min:1',
             'stok_kg' => 'nullable|integer|min:0',
-            'foto_produk' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         // Simpan foto
@@ -50,7 +50,7 @@ class ProdukController extends Controller
     {
         $validated = $request->validate([
             'nama_produk' => 'required|string|max:255',
-            'deskripsi_produk' => 'nullable|string',
+            'deskripsi_produk' => 'required|string|min:20|max:100',
             'harga_kg' => 'required|integer|min:1',
             'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);

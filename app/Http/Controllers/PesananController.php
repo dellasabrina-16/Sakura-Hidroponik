@@ -56,7 +56,7 @@ class PesananController extends Controller
             'nama_pelanggan' => 'required|string|max:255',
             'tanggal_pesanan' => 'required|date',
             'jenis_pengambilan' => 'required|string',
-            'alamat' => 'required|string',
+            'alamat' => 'required_if:jenis_pengambilan,diantar|string|nullable',
             'no_whatsapp' => 'required|string|max:20',
             'produk' => 'required|array|min:1',
             'produk.*.id' => 'required|exists:produks,id',
@@ -79,7 +79,7 @@ class PesananController extends Controller
                 'nama_pelanggan' => $request->nama_pelanggan,
                 'tanggal_pesanan' => $request->tanggal_pesanan,
                 'jenis_pengambilan' => $request->jenis_pengambilan,
-                'alamat' => $request->alamat,
+                'alamat' => $request->jenis_pengambilan === 'diantar' ? $request->alamat : '-',
                 'no_whatsapp' => $request->no_whatsapp,
                 'total_harga' => 0,
             ]);
@@ -111,13 +111,13 @@ class PesananController extends Controller
             $pesanan->update(['total_harga' => $totalHarga]);
 
             // ✅ Kirim pesan WhatsApp ke pelanggan setelah pesanan dibuat
-            $pesan = "*Sakura Hidroponik*\n\n".
-                "Halo {$pesanan->nama_pelanggan},\n".
-                "Pesanan kamu telah kami terima ✅\n\n".
-                "Tanggal: {$pesanan->tanggal_pesanan}\n".
-                "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n".
+            $pesan = "*Sakura Hidroponik*\n\n" .
+                "Halo {$pesanan->nama_pelanggan},\n" .
+                "Pesanan kamu telah kami terima ✅\n\n" .
+                "Tanggal: {$pesanan->tanggal_pesanan}\n" .
+                "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
                 "Kami akan segera memproses pesananmu 🙏";
-            
+
             $this->sendWa($pesanan->no_whatsapp, $pesan);
         });
 
@@ -168,9 +168,9 @@ class PesananController extends Controller
         $pesanan->save();
 
         // ✅ Kirim pesan WhatsApp saat status berubah
-        $pesan = "*Sakura Hidroponik*\n\n".
-            "Halo {$pesanan->nama_pelanggan},\n".
-            "Status pesanan kamu telah diperbarui 📨\n\n".
+        $pesan = "*Sakura Hidroponik*\n\n" .
+            "Halo {$pesanan->nama_pelanggan},\n" .
+            "Status pesanan kamu telah diperbarui 📨\n\n" .
             "Status sekarang: *" . strtoupper($status) . "*\n";
 
         if ($status === 'dibatalkan') {

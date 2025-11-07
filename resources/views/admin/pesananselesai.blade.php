@@ -69,6 +69,30 @@
             background-color: #218838;
             color: #fff;
         }
+
+        .btn-hijau {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-hijau:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: #fff;
+        }
+
+        .btn-link.btn-sm {
+            color: #28a745;
+            padding: 0;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .btn-link.btn-sm:hover {
+            color: #218838;
+            text-decoration: none;
+        }
     </style>
 @endsection
 
@@ -114,20 +138,22 @@
 
         {{-- Tab Panes --}}
         <div class="tab-content">
+
             {{-- Pesanan Selesai --}}
             <div class="tab-pane fade show active" id="selesai" role="tabpanel" aria-labelledby="selesai-tab">
                 <div class="table-responsive">
                     <table id="pesanans_selesai" class="table table-striped table-sm">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Tanggal Pesanan</th>
-                                <th>Nama Pelanggan</th>
-                                <th>Produk</th>
-                                <th>Jenis Pengambilan</th>
-                                <th>Alamat</th>
-                                <th>Nomor WhatsApp</th>
-                                <th>Total Harga</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Tanggal Pesanan</th>
+                                <th class="text-center">Nama Pelanggan</th>
+                                <th class="text-center">Produk</th>
+                                <th class="text-center">Jenis Pengambilan</th>
+                                <th class="text-center">Alamat</th>
+                                <th class="text-center">Nomor WhatsApp</th>
+                                <th class="text-center">Total Harga</th>
+                                <th class="text-end">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -140,7 +166,14 @@
                                     <td>{{ ucfirst($pesanan->jenis_pengambilan) }}</td>
                                     <td>{{ $pesanan->alamat }}</td>
                                     <td>{{ $pesanan->no_whatsapp }}</td>
-                                    <td class="text-end">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                                    <td class="text-center">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                                    <td class="text-center">
+                                        {{-- Tombol detail --}}
+                                        <button class="btn btn-link btn-sm p-0" data-bs-toggle="modal"
+                                            data-bs-target="#ModalDetailPesanan{{ $pesanan->id }}">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -154,15 +187,15 @@
                     <table id="pesanans_batal" class="table table-striped table-sm">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Tanggal Pesanan</th>
-                                <th>Nama Pelanggan</th>
-                                <th>Produk</th>
-                                <th>Jenis Pengambilan</th>
-                                <th>Alamat</th>
-                                <th>Nomor WhatsApp</th>
-                                <th>Total Harga</th>
-                                <th>Alasan Dibatalkan</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center">Tanggal Pesanan</th>
+                                <th class="text-center">Nama Pelanggan</th>
+                                <th class="text-center">Produk</th>
+                                <th class="text-center">Jenis Pengambilan</th>
+                                {{-- <th class="text-center">Alamat</th> --}}
+                                <th class="text-center">Nomor WhatsApp</th>
+                                <th class="text-center">Total Harga</th>
+                                <th class="text-center">Alasan Dibatalkan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -173,10 +206,10 @@
                                     <td>{{ $pesanan->nama_pelanggan }}</td>
                                     <td>{{ $pesanan->details->count() }} produk</td>
                                     <td>{{ ucfirst($pesanan->jenis_pengambilan) }}</td>
-                                    <td>{{ $pesanan->alamat }}</td>
+                                    {{-- <td>{{ $pesanan->alamat }}</td> --}}
                                     <td>{{ $pesanan->no_whatsapp }}</td>
-                                    <td class="text-end">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
-                                    <td>{{ $pesanan->alasan_dibatalkan }}</td>
+                                    <td class="text-center">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                                    <td class="text-center">{{ $pesanan->alasan_dibatalkan }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -184,10 +217,112 @@
                 </div>
             </div>
         </div>
+
+        {{-- Modal Detail Pesanan --}}
+        @foreach ($pesananSelesai as $pesanan)
+            <div class="modal fade" id="ModalDetailPesanan{{ $pesanan->id }}" tabindex="-1"
+                aria-labelledby="ModalDetailPesananLabel{{ $pesanan->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-md modal-dialog-centered">
+                    <div class="modal-content p-3">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title fw-bold" id="ModalDetailPesananLabel{{ $pesanan->id }}">Detail Pesanan
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                        </div>
+                        <div class="modal-body" id="printArea{{ $pesanan->id }}">
+
+                            <!-- Header Toko -->
+                            <div class="text-center mb-2">
+                                <h6 class="fw-bold mb-0">🌱 Sakura Hidroponik 🌱</h6>
+                                <small>Jl. Mawar No. 10, Jakarta</small><br>
+                                <small>Telp/WA: 0812-3456-7890</small>
+                                <hr style="border-top: 1px dashed #000;">
+                            </div>
+
+                            <!-- Info Pesanan -->
+                            <div>
+                                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                            <small>Tanggal : {{ $pesanan->tanggal_pesanan }}</small><br>
+                                            <small>Jenis : {{ ucfirst($pesanan->jenis_pengambilan) }}</small><br>
+                                            <small>Alamat : {{ $pesanan->alamat }}</small>
+                                        </td>
+                                        <td style="width: 50%; vertical-align: top; padding-left: 40px;">
+                                            <small>Nama : {{ $pesanan->nama_pelanggan }}</small><br>
+                                            <small>No. WhatsApp : {{ $pesanan->no_whatsapp }}</small>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <hr style="border-top: 1px dashed #000;">
+                            </div>
+
+                            <!-- List Produk -->
+                            <div>
+                                <table class="w-100" style="font-size: 13px;">
+                                    <tbody>
+                                        @foreach ($pesanan->details as $detail)
+                                            <tr>
+                                                <td>{{ $detail->nama_produk }}</td>
+                                                <td class="text-end">{{ $detail->jumlah_kg }} x
+                                                    {{ number_format($detail->harga_produk, 0, ',', '.') }}</td>
+                                                <td class="text-end">{{ number_format($detail->harga, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <hr style="border-top: 1px dashed #000;">
+                            </div>
+
+                            <!-- Total -->
+                            <div class="text-end fw-bold" style="font-size: 14px;">
+                                Total: Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}
+                            </div>
+
+                            <hr style="border-top: 1px dashed #000;">
+
+                            <!-- Footer -->
+                            <div class="text-center">
+                                <small>Terima kasih 🙏</small><br>
+                                <small>Belanja Sayur Segar di Sakura Hidroponik</small>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-hijau"
+                                onclick="printStruk('printArea{{ $pesanan->id }}')">
+                                <i class="bi bi-printer"></i> Print Struk
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+
     </div>
 @endsection
 
 @section('script')
+    <script>
+        function printStruk(areaId) {
+            var printContent = document.getElementById(areaId).innerHTML;
+            var WinPrint = window.open('', '', 'width=400,height=600');
+            WinPrint.document.write('<html><head><title>Struk Pesanan</title>');
+            WinPrint.document.write('<style>');
+            WinPrint.document.write('body{font-family: monospace; font-size: 13px; padding:10px;}');
+            WinPrint.document.write('table{width:100%; border-collapse: collapse;} td{padding:2px 0;}');
+            WinPrint.document.write('hr{border:none; border-top:1px dashed #000; margin:4px 0;}');
+            WinPrint.document.write('</style>');
+            WinPrint.document.write('</head><body>');
+            WinPrint.document.write(printContent);
+            WinPrint.document.write('</body></html>');
+            WinPrint.document.close();
+            WinPrint.focus();
+            WinPrint.print();
+            WinPrint.close();
+        }
+    </script>
+
     <script>
         // Inisialisasi DataTable
         const tableSelesai = new DataTable('#pesanans_selesai');

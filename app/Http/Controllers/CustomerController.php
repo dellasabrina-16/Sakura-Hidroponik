@@ -12,11 +12,14 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        // ambil produk dengan relasi stok
         $produks = Produk::with('stok')->latest()->get();
+        $totalProdukTersedia = $produks->filter(function ($produk) {
+            return $produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->status == 1;
+        })->count();
 
-        return view('customer.index', compact('produks'));
+        return view('customer.index', compact('produks', 'totalProdukTersedia'));
     }
+
 
     /**
      * Show the form for creating a new resource.

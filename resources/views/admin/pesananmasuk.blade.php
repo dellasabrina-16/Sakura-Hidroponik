@@ -36,23 +36,16 @@
             color: #fff;
         }
 
-        /* Tombol link hijau */
         .btn-link.btn-sm {
             color: #28a745;
-            /* hijau tema */
             padding: 0;
-            /* tetap sesuai class p-0 */
             font-size: 0.9rem;
-            /* opsional: sesuaikan ukuran */
             text-decoration: none;
-            /* hilangkan underline default */
         }
 
         .btn-link.btn-sm:hover {
             color: #218838;
-            /* hijau gelap saat hover */
             text-decoration: none;
-            /* tetap tanpa underline */
         }
     </style>
 @endsection
@@ -85,7 +78,7 @@
                         <th>Produk</th>
                         <th>Jenis Pengambilan</th>
                         <th>Alamat</th>
-                        <th>Total Harga</th>
+                        <th class="text-center">Total Harga</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -98,7 +91,7 @@
                             <td>{{ $pesanan->details->count() }} produk</td>
                             <td>{{ ucfirst($pesanan->jenis_pengambilan) }}</td>
                             <td>{{ $pesanan->alamat }}</td>
-                            <td class="text-end">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
+                            <td class="text-center">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center align-items-center gap-2">
                                     {{-- Badge status --}}
@@ -211,10 +204,19 @@
 
                             <!-- Info Pesanan -->
                             <div>
-                                <small>Tanggal : {{ $pesanan->tanggal_pesanan }}</small><br>
-                                <small>Pelanggan : {{ $pesanan->nama_pelanggan }}</small><br>
-                                <small>Jenis : {{ ucfirst($pesanan->jenis_pengambilan) }}</small><br>
-                                <small>Alamat : {{ $pesanan->alamat }}</small><br>
+                                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                            <small>Tanggal : {{ $pesanan->tanggal_pesanan }}</small><br>
+                                            <small>Jenis : {{ ucfirst($pesanan->jenis_pengambilan) }}</small><br>
+                                            <small>Alamat : {{ $pesanan->alamat }}</small>
+                                        </td>
+                                        <td style="width: 50%; vertical-align: top; padding-left: 40px;">
+                                            <small>Nama : {{ $pesanan->nama_pelanggan }}</small><br>
+                                            <small>No. WhatsApp : {{ $pesanan->no_whatsapp }}</small>
+                                        </td>
+                                    </tr>
+                                </table>
                                 <hr style="border-top: 1px dashed #000;">
                             </div>
 
@@ -278,14 +280,12 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Nama Pelanggan</label>
-                                    <input type="text" name="nama_pelanggan"
-                                        class="form-control"
+                                    <input type="text" name="nama_pelanggan" class="form-control"
                                         value="{{ old('nama_pelanggan') }}" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tanggal Pesanan</label>
-                                    <input type="date" name="tanggal_pesanan"
-                                        class="form-control"
+                                    <input type="date" name="tanggal_pesanan" class="form-control"
                                         value="{{ old('tanggal_pesanan') }}" required>
                                 </div>
                             </div>
@@ -293,24 +293,32 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Nomor WhatsApp</label>
-                                    <input type="text" name="no_whatsapp"
-                                        class="form-control"
+                                    <input type="text" name="no_whatsapp" class="form-control"
                                         value="{{ old('no_whatsapp') }}" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Metode Pengambilan</label>
-                                    <select name="jenis_pengambilan" class="form-select" required>
-                                        <option disabled {{ old('jenis_pengambilan') ? '' : 'selected' }}>Pilih Metode</option>
-                                        <option value="diantar" {{ old('jenis_pengambilan') == 'diantar' ? 'selected' : '' }}>Diantar</option>
-                                        <option value="ambil di kebun" {{ old('jenis_pengambilan') == 'ambil di kebun' ? 'selected' : '' }}>Ambil di Kebun</option>
-                                        <option value="ambil di rumah" {{ old('jenis_pengambilan') == 'ambil di rumah' ? 'selected' : '' }}>Ambil di Rumah</option>
+                                    <select id="jenis_pengambilan" name="jenis_pengambilan" class="form-select" required>
+                                        <option disabled {{ old('jenis_pengambilan') ? '' : 'selected' }}>Pilih Metode
+                                        </option>
+                                        <option value="diantar"
+                                            {{ old('jenis_pengambilan') == 'diantar' ? 'selected' : '' }}>Diantar</option>
+                                        <option value="ambil di kebun"
+                                            {{ old('jenis_pengambilan') == 'ambil di kebun' ? 'selected' : '' }}>Ambil di
+                                            Kebun</option>
+                                        <option value="ambil di rumah"
+                                            {{ old('jenis_pengambilan') == 'ambil di rumah' ? 'selected' : '' }}>Ambil di
+                                            Rumah</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Alamat</label>
-                                <textarea name="alamat" class="form-control" rows="2">{{ old('alamat') }}</textarea>
+                            <div class="mb-3" id="alamat-container" style="display: none;">
+                                <label class="form-label">Alamat Lengkap (hanya untuk pengantaran)</label>
+                                <textarea name="alamat" id="alamat" class="form-control" rows="5"
+                                    placeholder="Contoh: RT 03 / RW 07, Dusun Kromasan, Desa Beru, Kelurahan Beru, Kecamatan Wlingi, Jalan Mawar No. 12">{{ old('alamat') }}</textarea>
+                                <small class="text-muted">Gunakan format: RT/RW, Dusun, Desa, Kelurahan, Kecamatan, Nama
+                                    Jalan</small>
                             </div>
 
                             <h6 class="fw-bold mb-2">Detail Produk</h6>
@@ -330,35 +338,38 @@
                                     @endphp
 
                                     @foreach ($oldProduk as $i => $p)
-                                    <tr>
-                                        <td class="no">{{ $loop->iteration }}</td>
-                                        <td>
-                                            <select name="produk[{{ $i }}][id]" class="form-select produkSelect" required>
-                                                <option disabled {{ $p['id'] ? '' : 'selected' }}>Pilih Produk</option>
-                                                @foreach ($produks as $produk)
-                                                    @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->status)
-                                                        <option value="{{ $produk->id }}"
-                                                            data-harga="{{ $produk->harga_kg }}"
-                                                            {{ $p['id'] == $produk->id ? 'selected' : '' }}>
-                                                            {{ $produk->nama_produk }} (Stok: {{ $produk->stok->stok_kg }} kg)
-                                                        </option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="produk[{{ $i }}][jumlah]"
-                                                class="form-control jumlahInput"
-                                                min="1"
-                                                value="{{ $p['jumlah'] }}">
-                                        </td>
-                                        <td class="text-end subtotal">Rp 0</td>
-                                        <td><button type="button" class="btn btn-danger btn-sm hapusRow">Hapus</button></td>
-                                    </tr>
+                                        <tr>
+                                            <td class="no">{{ $loop->iteration }}</td>
+                                            <td>
+                                                <select name="produk[{{ $i }}][id]"
+                                                    class="form-select produkSelect" required>
+                                                    <option disabled {{ $p['id'] ? '' : 'selected' }}>Pilih Produk</option>
+                                                    @foreach ($produks as $produk)
+                                                        @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->status)
+                                                            <option value="{{ $produk->id }}"
+                                                                data-harga="{{ $produk->harga_kg }}"
+                                                                {{ $p['id'] == $produk->id ? 'selected' : '' }}>
+                                                                {{ $produk->nama_produk }} (Stok:
+                                                                {{ $produk->stok->stok_kg }} kg)
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="produk[{{ $i }}][jumlah]"
+                                                    class="form-control jumlahInput" min="1"
+                                                    value="{{ $p['jumlah'] }}">
+                                            </td>
+                                            <td class="text-end subtotal">Rp 0</td>
+                                            <td><button type="button"
+                                                    class="btn btn-danger btn-sm hapusRow">Hapus</button></td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">+ Tambah Produk</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">+ Tambah
+                                Produk</button>
 
                             <div class="text-end mt-3 fw-bold">
                                 Total: <span id="grandTotal">Rp 0</span>
@@ -578,6 +589,7 @@
             document.getElementById('grandTotal').textContent = "Rp " + total.toLocaleString();
         }
     </script>
+
     <script>
         function updateRowNumbers() {
             document.querySelectorAll('#produkTable tbody tr').forEach((row, index) => {
@@ -599,41 +611,84 @@
         });
     </script>
 
-    @if(session('modal') === 'tambah-pesanan' || $errors->has('stok'))
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: "{{ $errors->first('stok') }}"
-        }).then(() => {
-            $('#ModalTambahPesanan').modal('show'); // modal tetap terbuka
-        });
-    </script>
+    @if (session('modal') === 'tambah-pesanan' || $errors->has('stok'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ $errors->first('stok') }}"
+            }).then(() => {
+                $('#ModalTambahPesanan').modal('show'); // modal tetap terbuka
+            });
+        </script>
     @endif
 
     <script>
         @if (session('success'))
-            <
-            script >
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: '{{ session('success') }}',
-                    timer: 2000,
-                    showConfirmButton: false
-                }) <
-                />
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @elseif (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: '{{ session('error') }}'
+            });
         @endif
+    </script>
 
-        @if (session('error'))
-            <
-            script >
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: '{{ session('error') }}',
-                })
-    </>
-    @endif
+    <script>
+        $(document).ready(function() {
+            // Tampilkan alamat hanya jika pilih "diantar"
+            function toggleAlamat() {
+                const metode = $("#jenis_pengambilan").val();
+                if (metode === "diantar") {
+                    $("#alamat-container").slideDown();
+                    $("#alamat").attr("required", true);
+                } else {
+                    $("#alamat-container").slideUp();
+                    $("#alamat").removeAttr("required");
+                    $("#alamat").val(''); // Kosongkan kalau bukan diantar
+                }
+            }
+
+            // Jalankan saat pertama kali halaman dimuat
+            toggleAlamat();
+
+            // Jalankan setiap kali metode pengambilan berubah
+            $("#jenis_pengambilan").on("change", toggleAlamat);
+
+            // AJAX form submit seperti sebelumnya
+            $("#checkout-form").on("submit", function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr("action"),
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Pesanan Berhasil!",
+                                confirmButtonText: "Ok"
+                            }).then(() => {
+                                window.location.href = res.redirect;
+                            });
+                        } else {
+                            Swal.fire("Gagal!", res.message, "error");
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire("Error!", xhr.responseJSON?.message || "Terjadi kesalahan.",
+                            "error");
+                    }
+                });
+            });
+        });
     </script>
 @endsection

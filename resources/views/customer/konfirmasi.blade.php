@@ -53,17 +53,11 @@
         </div>
         <div class="container px-0">
             <nav class="navbar navbar-light bg-white navbar-expand-xl">
-                <a href="index.html" class="navbar-brand">
+                <a href="/" class="navbar-brand">
                     <h1 class="text-primary display-6">Sakura Hidroponik</h1>
                 </a>
 
                 <div class="d-flex ms-auto">
-                    <a href="#" class="position-relative text-end my-auto">
-                        <i class="fas fa-shopping-bag fa-2x"></i>
-                        <span
-                            class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                            style="top: -5px; xleft: 15px; height: 20px; min-width: 20px;">3</span>
-                    </a>
                 </div>
             </nav>
         </div>
@@ -104,7 +98,7 @@
 
                         <div class="form-item mb-3">
                             <label class="form-label">Metode Pengambilan</label>
-                            <select name="jenis_pengambilan" class="form-select" required>
+                            <select id="jenis_pengambilan" name="jenis_pengambilan" class="form-select" required>
                                 <option disabled {{ old('jenis_pengambilan') ? '' : 'selected' }}>Pilih Metode</option>
                                 <option value="diantar" {{ old('jenis_pengambilan') == 'diantar' ? 'selected' : '' }}>
                                     Diantar</option>
@@ -117,9 +111,24 @@
                             </select>
                         </div>
 
-                        <div class="form-item mb-3">
-                            <label class="form-label">Alamat</label>
-                            <textarea name="alamat" class="form-control" rows="4">{{ old('alamat') }}</textarea>
+                        <!-- Form alamat (muncul jika diantar) -->
+                        <div class="form-item mb-3" id="alamat-container" style="display: none;">
+                            <label class="form-label">Alamat Lengkap (hanya untuk pengantaran)</label>
+                            <textarea name="alamat" id="alamat" class="form-control" rows="5"
+                                placeholder="Contoh: RT 03 / RW 07, Dusun Kromasan, Desa Beru, Kelurahan Beru, Kecamatan Wlingi, Jalan Mawar No. 12">{{ old('alamat') }}</textarea>
+                            <small class="text-muted">Gunakan format: RT/RW, Dusun, Desa, Kelurahan, Kecamatan, Nama
+                                Jalan</small>
+                        </div>
+
+                        <!-- Map lokasi ambil (muncul jika ambil di kebun atau rumah) -->
+                        <div class="form-item mb-3" id="map-container" style="display: none;">
+                            <label class="form-label">Lokasi Pengambilan</label>
+                            <div class="ratio ratio-16x9">
+                                <iframe id="map-iframe" src="" style="border:0;" allowfullscreen=""
+                                    loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                            <small class="text-muted d-block mt-2" id="map-desc"></small>
                         </div>
                     </div>
 
@@ -233,7 +242,7 @@
                                 confirmButtonText: "Ok"
                             }).then(() => {
                                 window.location.href = res
-                                .redirect; // redirect ke index
+                                    .redirect; // redirect ke index
                             });
                         } else {
                             Swal.fire("Gagal!", res.message, "error");
@@ -248,7 +257,62 @@
         });
     </script>
 
+    <script>
+        $(document).ready(function() {
+            function toggleAlamat() {
+                const metode = $("#jenis_pengambilan").val();
+                const $alamatContainer = $("#alamat-container");
+                const $mapContainer = $("#map-container");
+                const $mapIframe = $("#map-iframe");
+                const $mapDesc = $("#map-desc");
+
+                if (metode === "diantar") {
+                    // Jika memilih diantar → tampilkan form alamat
+                    $alamatContainer.slideDown();
+                    $("#alamat").attr("required", true);
+                    $mapContainer.slideUp();
+                    $mapIframe.attr("src", "");
+                    $mapDesc.text("");
+                } else if (metode === "ambil di kebun") {
+                    // Jika memilih ambil di kebun → tampilkan peta kebun Sakura Hidroponik
+                    $alamatContainer.slideUp();
+                    $("#alamat").removeAttr("required").val('');
+                    $mapContainer.slideDown();
+                    $mapIframe.attr("src",
+                        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.515726946294!2d112.3063123!3d-8.1002614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7893cb6d9dbabb%3A0x9ce5bed2d55ed512!2sSakura%20Hidroponik!5e0!3m2!1sid!2sid!4v1731042000000!5m2!1sid!2sid"
+                    );
+                    $mapDesc.text(
+                        "Lokasi Kebun Sakura Hidroponik - Silakan menuju titik peta ini untuk pengambilan.");
+                } else if (metode === "ambil di rumah") {
+                    // Jika memilih ambil di rumah → tampilkan peta Warung Mak Jass (lokasi rumah)
+                    $alamatContainer.slideUp();
+                    $("#alamat").removeAttr("required").val('');
+                    $mapContainer.slideDown();
+                    $mapIframe.attr("src",
+                        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.497641660689!2d112.3077261!3d-8.099229899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78936fc9a855f9%3A0x6a1c4a0085fded5e!2sWarung%20Mak%20Jass!5e0!3m2!1sid!2sid!4v1731039999999!5m2!1sid!2sid"
+                    );
+                    $mapDesc.text(
+                        "Lokasi Rumah Pengambilan (Warung Mak Jass) - Silakan menuju titik peta ini untuk pengambilan."
+                        );
+                } else {
+                    // Jika belum memilih apa pun → sembunyikan semua
+                    $alamatContainer.slideUp();
+                    $mapContainer.slideUp();
+                    $("#alamat").removeAttr("required");
+                    $mapIframe.attr("src", "");
+                    $mapDesc.text("");
+                }
+            }
+
+            // Jalankan saat halaman pertama kali dimuat
+            toggleAlamat();
+
+            // Jalankan ulang tiap kali user ganti metode
+            $("#jenis_pengambilan").on("change", toggleAlamat);
+        });
+    </script>
+
+
 </body>
 
 </html>
-`

@@ -53,18 +53,9 @@
         </div>
         <div class="container px-0">
             <nav class="navbar navbar-light bg-white navbar-expand-xl">
-                <a href="index.html" class="navbar-brand">
+                <a href="/" class="navbar-brand">
                     <h1 class="text-primary display-6">Sakura Hidroponik</h1>
                 </a>
-
-                <div class="d-flex ms-auto">
-                    <a href="#" class="position-relative text-end my-auto">
-                        <i class="fas fa-shopping-bag fa-2x"></i>
-                        <span
-                            class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                            style="top: -5px; xleft: 15px; height: 20px; min-width: 20px;">3</span>
-                    </a>
-                </div>
             </nav>
         </div>
 
@@ -105,10 +96,14 @@
                                     @php $grandTotal = 0; @endphp
                                     @foreach ($keranjang as $id => $item)
                                         @php
-                                            $total = $item['harga'] * $item['jumlah'];
+                                            $harga_item = $item['harga'];
+                                            $stok_item = $item['stok'] ?? 0;
+                                            $total = $harga_item * $item['jumlah'];
                                             $grandTotal += $total;
                                         @endphp
-                                        <tr data-harga="{{ $item['harga'] }}">
+                                        <tr data-id="{{ $id }}" data-harga="{{ $harga_item }}"
+                                            data-stok="{{ $stok_item }}">
+
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="{{ $item['gambar'] ?? 'img/noimage.png' }}"
@@ -142,7 +137,7 @@
                                                         <button
                                                             class="btn btn-sm btn-plus rounded-circle bg-light border update-qty"
                                                             data-id="{{ $id }}" data-type="plus">
-                                                            <i class="fa fa-plus"></i>
+                                                            <i class="fa fa-plus "></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -189,9 +184,10 @@
                         </div>
                         <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                             <a href="{{ route('konfirmasi.index') }}"
-                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4">
+                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4 btn-konfirmasi">
                                 KONFIRMASI
                             </a>
+
 
                         </div>
                     </div>
@@ -252,16 +248,70 @@
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
+    <!-- Tambahkan ini di layout atau di atas script -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         $(document).ready(function() {
-            // Update qty (plus/minus)
+
             $(document).on("click", ".update-qty", function() {
                 let id = $(this).data("id");
                 let type = $(this).data("type");
                 let $row = $(this).closest("tr");
                 let $qtyInput = $row.find(".qty-input");
                 let $subtotal = $row.find(".subtotal");
+                let stok = parseFloat($row.data("stok"));
+                let currentQty = parseInt($qtyInput.val());
 
+                // 🔸 Jika user menekan minus dan hasilnya jadi 0
+                if (type === 'minus' && currentQty <= 1) {
+                    Swal.fire({
+                        title: "Hapus barang?",
+                        text: "Jumlah akan menjadi 0, apakah kamu ingin menghapus barang ini dari keranjang?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, hapus",
+                        cancelButtonText: "Batal"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: "/keranjang/remove",
+                                method: "POST",
+                                data: {
+                                    _token: "{{ csrf_token() }}",
+                                    id: id
+                                },
+                                success: function(res) {
+                                    if (res.success) {
+                                        $row.remove();
+                                        updateGrandTotal();
+                                        Swal.fire("Dihapus!",
+                                            "Barang berhasil dihapus.", "success");
+                                    }
+                                }
+                            });
+                        } else {
+                            $qtyInput.val(1);
+                        }
+                    });
+                    return;
+                }
+
+                // // 🔸 Jika user menekan plus
+                // if (type === 'plus') {
+                //     // kalau sudah mencapai stok maksimal, tampilkan alert dan batalkan
+                //     if (currentQty >= stok) {
+                //         Swal.fire({
+                //             icon: "error",
+                //             title: "Stok Tidak Cukup",
+                //             text: "Kamu sudah menambahkan semua stok yang tersedia (" + stok + ")."
+                //         });
+                //         $qtyInput.val(stok); // pastikan tampilannya mentok di stok maksimal
+                //         return; // jangan kirim request ke server
+                //     }
+                // }
+
+                // 🔸 Kalau lolos semua validasi → kirim AJAX update
                 $.ajax({
                     url: "/keranjang/update",
                     method: "POST",
@@ -272,46 +322,67 @@
                     },
                     success: function(res) {
                         if (res.success) {
-                            // Ambil jumlah terbaru langsung dari server
-                            let currentQty = res.qty;
-
-                            // Update qty di input
-                            $qtyInput.val(currentQty);
-
-                            // Hitung ulang subtotal
+                            let newQty = res.qty;
+                            $qtyInput.val(newQty);
                             let harga = parseInt($row.data("harga"));
-                            let total = harga * currentQty;
+                            let total = harga * newQty;
                             $subtotal.text("Rp " + total.toLocaleString("id-ID"));
-
-                            // Update grand total
+                            updateGrandTotal();
+                        }
+                        // 🔹 kalau stok habis di server
+                        else if (res.message === "stok_habis") {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Stok Tidak Cukup",
+                                text: "Kamu sudah menambahkan semua stok yang tersedia (" +
+                                    res.stok + ")."
+                            });
+                            $qtyInput.val(res.stok);
+                            let harga = parseInt($row.data("harga"));
+                            let total = harga * res.stok;
+                            $subtotal.text("Rp " + total.toLocaleString("id-ID"));
                             updateGrandTotal();
                         }
                     }
+
                 });
             });
 
-            // Hapus item
+            // 🔸 Hapus item dengan tombol silang
             $(document).on("click", ".remove-item", function() {
                 let id = $(this).data("id");
                 let $row = $(this).closest("tr");
 
-                $.ajax({
-                    url: "/keranjang/remove",
-                    method: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        id: id
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            $row.remove();
-                            updateGrandTotal();
-                        }
+                Swal.fire({
+                    title: "Hapus barang?",
+                    text: "Apakah kamu yakin ingin menghapus barang ini dari keranjang?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Ya, hapus",
+                    cancelButtonText: "Batal"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/keranjang/remove",
+                            method: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                id: id
+                            },
+                            success: function(res) {
+                                if (res.success) {
+                                    $row.remove();
+                                    updateGrandTotal();
+                                    Swal.fire("Dihapus!", "Barang berhasil dihapus.",
+                                        "success");
+                                }
+                            }
+                        });
                     }
                 });
             });
 
-            // Hitung ulang grand total
+            // 🔸 Update total keseluruhan
             function updateGrandTotal() {
                 let grandTotal = 0;
                 $(".qty-input").each(function() {
@@ -319,13 +390,49 @@
                     let harga = parseInt($(this).closest("tr").data("harga"));
                     grandTotal += qty * harga;
                 });
-
-                // update hanya kotak total belanja
                 $("#grand-total").text("Rp " + grandTotal.toLocaleString("id-ID"));
             }
+
+            // 🔸 Update total keseluruhan
+            function updateGrandTotal() {
+                let grandTotal = 0;
+                $(".qty-input").each(function() {
+                    let qty = parseInt($(this).val());
+                    let harga = parseInt($(this).closest("tr").data("harga"));
+                    grandTotal += qty * harga;
+                });
+                $("#grand-total").text("Rp " + grandTotal.toLocaleString("id-ID"));
+
+                // 🔹 Cek apakah keranjang kosong
+                cekKeranjangKosong();
+            }
+
+            // 🔸 Fungsi untuk disable tombol konfirmasi jika keranjang kosong
+            function cekKeranjangKosong() {
+                if ($("tbody tr").length === 0) {
+                    $(".btn-konfirmasi").addClass("disabled").attr("disabled", true);
+                } else {
+                    $(".btn-konfirmasi").removeClass("disabled").attr("disabled", false);
+                }
+            }
+
+            // 🔹 Jalankan saat halaman pertama kali dibuka
+            cekKeranjangKosong();
+
+            // 🔸 Tambahkan handler agar tombol konfirmasi kasih peringatan kalau kosong
+            $(document).on("click", ".btn-konfirmasi", function(e) {
+                if ($(this).hasClass("disabled")) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Keranjang Kosong!",
+                        text: "Kamu belum menambahkan produk apa pun ke keranjang.",
+                    });
+                }
+            });
+
         });
     </script>
-
 
 
 </body>

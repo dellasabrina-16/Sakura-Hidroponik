@@ -105,7 +105,8 @@
                                 <br>
                                 {{-- Badge stok rendah --}}
                                 @if ($produk->stok && $produk->stok->stok_kg > 0 && $produk->stok->stok_kg < 5 && $produk->stok->status)
-                                    <span class="badge bg-danger">Stok Rendah</span>
+                                    {{-- <span class="badge bg-danger">Stok Rendah</span> --}}
+                                    <span class="badge bg-danger">{{ $produk->stok->stok_kg }} kg</span>
                                 @endif
                             </td>
 
@@ -151,16 +152,25 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Foto Produk</label>
-                            <input type="file" name="foto_produk" class="form-control file-input"
+                            <input type="file" id="foto_produk" name="foto_produk" class="form-control file-input"
                                 data-preview="previewTambah" accept="image/*" required>
-                            <div class="mt-3">
+                            {{-- <div class="mt-3">
                                 <img id="previewTambah" class="preview-img" />
+                            </div> --}}
+
+                            <!-- Preview dan crop area -->
+                            <div class="mt-3" style="max-width: 100%; text-align:center;">
+                                <img id="previewTambah" src="#" alt="Preview" style="max-width:100%; display:none;">
                             </div>
+
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi_produk" class="form-control" rows="3" required></textarea>
+                            <textarea name="deskripsi_produk" class="form-control" rows="3" minlength="20" maxlength="100" required
+                                placeholder="Masukkan deskripsi produk (20–100 karakter)"></textarea>
+                            <div class="form-text">Deskripsi minimal 20 dan maksimal 100 karakter.</div>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Harga per Kg</label>
                             <input type="number" name="harga_kg" class="form-control" required>
@@ -181,7 +191,7 @@
     </div>
 
 
-    {{-- Modal Edit Produk (Tunggal) --}}
+    {{-- Modal Edit Produk --}}
     <div class="modal fade" id="modalEditProduk" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered ">
             <div class="modal-content p-3">
@@ -199,15 +209,23 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Foto Produk</label>
-                            <input type="file" name="foto_produk" id="editFoto" class="form-control file-input"
-                                data-preview="previewEdit" accept="image/*">
-                            <div class="mt-3">
+                            <input type="file"id="foto_produk" name="foto_produk" id="editFoto"
+                                class="form-control file-input" data-preview="previewEdit" accept="image/*">
+                            {{-- <div class="mt-3">
                                 <img id="previewEdit" class="preview-img" />
+                            </div> --}}
+
+                            <!-- Preview dan crop area -->
+                            <div class="mt-3" style="max-width: 100%; text-align:center;">
+                                <img id="previewEdit" src="#" alt="Preview"
+                                    style="max-width:100%; display:none;">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi_produk" id="editDeskripsi" class="form-control" rows="3"></textarea>
+                            <textarea name="deskripsi_produk" id="editDeskripsi" class="form-control" rows="3" minlength="20"
+                                maxlength="100" required placeholder="Masukkan deskripsi produk (20–100 karakter)"></textarea>
+                            <div class="form-text">Deskripsi minimal 20 dan maksimal 100 karakter.</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Harga per Kg</label>
@@ -225,6 +243,7 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         // DataTable
         new DataTable('#produks');
@@ -314,16 +333,138 @@
                 const harga = row.dataset.harga;
                 const foto = row.dataset.foto;
 
-                // Isi form
                 editNama.value = nama;
                 editDeskripsi.value = deskripsi;
                 editHarga.value = harga;
                 editPreview.src = foto;
                 editPreview.style.display = 'block';
 
-                // Set action form
                 formEdit.action = `/admin/produk/${id}`;
             });
+        });
+    </script>
+
+    <script>
+        let cropperTambah, cropperEdit;
+
+        const inputTambah = document.querySelector('#modalTambahProduk input[name="foto_produk"]');
+        const imageTambah = document.getElementById('previewTambah');
+
+        inputTambah.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageTambah.src = event.target.result;
+                imageTambah.style.display = 'block';
+
+                if (cropperTambah) cropperTambah.destroy();
+
+                cropperTambah = new Cropper(imageTambah, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    movable: true,
+                    zoomable: true,
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.querySelector('#modalTambahProduk form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (cropperTambah) {
+                cropperTambah.getCroppedCanvas().toBlob((blob) => {
+                    const formData = new FormData(e.target);
+                    formData.delete('foto_produk');
+                    formData.append('foto_produk', blob, 'cropped.png');
+
+                    fetch(e.target.action, {
+                        method: 'POST',
+                        body: formData,
+                    }).then(() => {
+                        // Tutup modal
+                        const modalTambah = bootstrap.Modal.getInstance(document.getElementById(
+                            'modalTambahProduk'));
+                        modalTambah.hide();
+
+                        // Tunggu modal tertutup sebelum menampilkan SweetAlert
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Produk berhasil ditambah!',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => location.reload());
+                        }, 500); // jeda 0.5 detik agar modal benar-benar tertutup
+                    });
+
+                });
+            } else {
+                e.target.submit();
+            }
+        });
+
+
+        const inputEdit = document.querySelector('#modalEditProduk input[name="foto_produk"]');
+        const imageEdit = document.getElementById('previewEdit');
+        const formEditProduk = document.querySelector('#modalEditProduk form');
+
+        inputEdit.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageEdit.src = event.target.result;
+                imageEdit.style.display = 'block';
+
+                if (cropperEdit) cropperEdit.destroy();
+
+                cropperEdit = new Cropper(imageEdit, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    movable: true,
+                    zoomable: true,
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        formEditProduk.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (cropperEdit) {
+                cropperEdit.getCroppedCanvas().toBlob((blob) => {
+                    const formData = new FormData(e.target);
+                    formData.delete('foto_produk');
+                    formData.append('foto_produk', blob, 'cropped.png');
+
+                    fetch(e.target.action, {
+                        method: 'POST',
+                        body: formData,
+                    }).then(() => {
+                        // Tutup modal
+                        const modalEdit = bootstrap.Modal.getInstance(document.getElementById(
+                            'modalEditProduk'));
+                        modalEdit.hide();
+
+                        // Tunggu modal tertutup sebelum menampilkan SweetAlert
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Perubahan disimpan!',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => location.reload());
+                        }, 500);
+                    });
+
+                });
+            } else {
+                e.target.submit();
+            }
         });
     </script>
 @endsection

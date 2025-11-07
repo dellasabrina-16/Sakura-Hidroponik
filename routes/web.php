@@ -7,6 +7,9 @@ use App\Http\Controllers\StokController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LaporanMingguanController;
+use App\Http\Controllers\LaporanBulananController;
+use App\Http\Controllers\LaporanTahunanController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerKeranjangController;
 use App\Http\Controllers\CustomerPesananController;
@@ -58,9 +61,10 @@ Route::middleware(['auth:admin', PreventBackHistory::class])->group(function () 
     // Route::get('/admin/pesananselesai', fn() => view('admin.pesananselesai'));
     Route::get('/admin/pesananselesai', [PesananController::class, 'riwayatpesanan'])->name('pesanan.riwayat');
 
-    Route::get('/admin/laporan/mingguan', fn() => view('admin.laporanmingguan'));
-    Route::get('/admin/laporan/bulanan', fn() => view('admin.laporanbulanan'));
-    Route::get('/admin/laporan/tahunan', fn() => view('admin.laporantahunan'));
+
+    Route::get('/admin/laporan/mingguan', [LaporanMingguanController::class, 'index'])->name('laporan.mingguan');
+    Route::get('/admin/laporan/bulanan', [LaporanBulananController::class, 'index'])->name('laporan.bulanan');
+    Route::get('/admin/laporan/tahunan', [LaporanTahunanController::class, 'index'])->name('laporan.tahunan');
 
     // Route::get('/admin/profile', [AuthController::class, 'profile'])
     //     ->name('profile')

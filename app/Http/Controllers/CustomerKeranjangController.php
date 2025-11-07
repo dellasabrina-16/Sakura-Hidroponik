@@ -11,8 +11,24 @@ class CustomerKeranjangController extends Controller
     {
         // Ambil data keranjang dari session (default: array kosong)
         $keranjang = session()->get('keranjang', []);
+
+        // Tambahkan stok dari tabel stoks (melalui relasi Produk)
+        foreach ($keranjang as $id => $item) {
+            $produk = \App\Models\Produk::find($id);
+
+            if ($produk) {
+                // Ambil stok dari tabel stoks berdasarkan produk_id
+                $stok = \App\Models\Stok::where('produk_id', $produk->id)->first();
+
+                $keranjang[$id]['stok'] = $stok ? (float) $stok->stok_kg : 0;
+            } else {
+                $keranjang[$id]['stok'] = 0;
+            }
+        }
+
         return view('customer.keranjang', compact('keranjang'));
     }
+
 
     public function add(Request $request)
     {
@@ -44,30 +60,47 @@ class CustomerKeranjangController extends Controller
         $keranjang = session()->get('keranjang', []);
         $id = $request->id;
 
-        if (isset($keranjang[$id])) {
-            if ($request->type === 'plus') {
-                $keranjang[$id]['jumlah']++;
-            } elseif ($request->type === 'minus' && $keranjang[$id]['jumlah'] > 1) {
-                $keranjang[$id]['jumlah']--;
-            }
-
-            // simpan kembali ke session
-            session()->put('keranjang', $keranjang);
-
-            // ambil jumlah terbaru
-            $qty = $keranjang[$id]['jumlah'];
-
+        if (!isset($keranjang[$id])) {
             return response()->json([
-                'success' => true,
-                'qty' => $qty
+                'success' => false,
+                'message' => 'Produk tidak ditemukan di keranjang'
             ]);
         }
 
+        // Ambil stok dari tabel stok (model Stok)
+        $stok = \App\Models\Stok::where('produk_id', $id)->first();
+        $stokTersedia = $stok ? (float)$stok->stok_kg : 0;
+
+        // Ambil jumlah saat ini di session
+        $jumlahSekarang = $keranjang[$id]['jumlah'];
+
+        // Logika update jumlah
+        if ($request->type === 'plus') {
+            if ($jumlahSekarang < $stokTersedia) {
+                $keranjang[$id]['jumlah']++;
+            } else {
+                // Sudah mencapai batas stok
+                session()->put('keranjang', $keranjang);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'stok_habis',
+                    'stok' => $stokTersedia,
+                    'qty' => $jumlahSekarang
+                ]);
+            }
+        } elseif ($request->type === 'minus' && $jumlahSekarang > 1) {
+            $keranjang[$id]['jumlah']--;
+        }
+
+        // Simpan ke session
+        session()->put('keranjang', $keranjang);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Produk tidak ditemukan di keranjang'
+            'success' => true,
+            'qty' => $keranjang[$id]['jumlah']
         ]);
     }
+
 
 
     public function remove(Request $request)

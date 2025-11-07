@@ -118,57 +118,73 @@
     <div class="container-fluid featurs py-5">
         <div class="container py-5">
             <div class="row g-4">
-                <div class="col-6 col-md-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
-                        <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
-                            <i class="fas fa-seedling fa-3x text-white"></i>
-                        </div>
-                        <div class="featurs-content text-center">
-                            <h5>Dijamin Segar</h5>
-                            <p class="mb-0">Dipetik langsung saat ada pesanan.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
-                        <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
-                            <i class="fas fa-ban fa-3x text-white"></i>
-                        </div>
-                        <div class="featurs-content text-center">
-                            <h5>Bebas Pestisida</h5>
-                            <p class="mb-0">Tumbuh tanpa bahan kimia.</p>
+                <div class="col-6 col-md-3 d-flex">
+                    <div
+                        class="featurs-item text-center rounded bg-light p-4 flex-fill d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
+                                <i class="fas fa-seedling fa-3x text-white"></i>
+                            </div>
+                            <div class="featurs-content text-center">
+                                <h5>Dijamin Segar</h5>
+                                <p class="mb-0">Dipetik langsung saat ada pesanan.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
-                        <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
-                            <i class="fas fa-award fa-3x text-white"></i>
-                        </div>
-                        <div class="featurs-content text-center">
-                            <h5>Kualitas Premium</h5>
-                            <p class="mb-0">Hanya panen terbaik yang kami kirim.</p>
+
+                <div class="col-6 col-md-3 d-flex">
+                    <div
+                        class="featurs-item text-center rounded bg-light p-4 flex-fill d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
+                                <i class="fas fa-ban fa-3x text-white"></i>
+                            </div>
+                            <div class="featurs-content text-center">
+                                <h5>Bebas Pestisida</h5>
+                                <p class="mb-0">Tumbuh tanpa bahan kimia.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
-                        <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
-                            <i class="fa fa-soap fa-3x text-white"></i>
+
+                <div class="col-6 col-md-3 d-flex">
+                    <div
+                        class="featurs-item text-center rounded bg-light p-4 flex-fill d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
+                                <i class="fas fa-award fa-3x text-white"></i>
+                            </div>
+                            <div class="featurs-content text-center">
+                                <h5>Kualitas Premium</h5>
+                                <p class="mb-0">Hanya panen terbaik yang kami kirim.</p>
+                            </div>
                         </div>
-                        <div class="featurs-content text-center">
-                            <h5>Kebersihan Terjaga</h5>
-                            <p class="mb-0">Tanpa kontaminasi tanah.</p>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 d-flex">
+                    <div
+                        class="featurs-item text-center rounded bg-light p-4 flex-fill d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
+                                <i class="fa fa-soap fa-3x text-white"></i>
+                            </div>
+                            <div class="featurs-content text-center">
+                                <h5>Kebersihan Terjaga</h5>
+                                <p class="mb-0">Tanpa kontaminasi tanah.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <!-- Featurs Section End -->
 
     <!-- Fruits Shop Start-->
-    <div class="container-fluid fruite py-5">
+    <div class="container-fluid fruite py-3">
         <div class="container py-5">
             <div class="tab-class text-center">
                 <div class="g-4">
@@ -186,15 +202,60 @@
                                             <img src="{{ asset('storage/' . $produk->foto_produk) }}"
                                                 class="img-fluid w-100 rounded-top" alt="{{ $produk->nama_produk }}">
                                         </div>
-                                        {{-- Badge stok --}}
-                                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute"
+                                        @php
+                                            $stok = $produk->stok->stok_kg ?? 0;
+                                            $status = $produk->stok->status ?? 0;
+
+                                            if ($stok == 0) {
+                                                $badgeText = 'Stok Habis';
+                                                $badgeClass = 'bg-danger';
+                                            } elseif ($status == 0 && $stok > 0) {
+                                                $badgeText = 'Nonaktif';
+                                                $badgeClass = 'bg-secondary';
+                                            } else {
+                                                $badgeText = 'Tersedia';
+                                                $badgeClass = 'bg-primary';
+                                            }
+                                        @endphp
+
+                                        {{-- @php
+                                            $stok = $produk->stok->stok_kg ?? 0;
+                                            $status = $produk->stok->status ?? 0;
+                                            $badgeText = null;
+                                            $badgeClass = null;
+
+                                            if ($stok == 0) {
+                                                $badgeText = 'Stok Habis';
+                                                $badgeClass = 'bg-danger';
+                                            } elseif ($status == 0 && $stok > 0) {
+                                                $badgeText = 'Nonaktif';
+                                                $badgeClass = 'bg-secondary';
+                                            }
+                                        @endphp --}}
+
+                                        <div class="text-white px-3 py-1 rounded position-absolute {{ $badgeClass }}"
                                             style="top: 10px; right: 10px;">
-                                            {{ $produk->stok && $produk->stok->stok_kg > 0 ? 'Tersedia' : 'Stok Habis' }}
+                                            {{ $badgeText }}
                                         </div>
 
-                                        <div class="p-4 rounded-bottom">
-                                            <h4>{{ $produk->nama_produk }}</h4>
-                                            <p>{{ $produk->deskripsi_produk }}</p>
+                                        {{-- @php
+                                            $stok = $produk->stok->stok_kg ?? 0;
+                                        @endphp
+
+                                        @if ($stok == 0)
+                                            <div class="text-white px-3 py-1 rounded position-absolute bg-danger"
+                                                style="top: 10px; right: 10px;">
+                                                Stok Habis
+                                            </div>
+                                        @endif --}}
+
+                                        <div
+                                            class="p-4 rounded-bottom d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <h4 class="mb-2">{{ $produk->nama_produk }}</h4>
+                                                <p class="deskripsi-produk text-muted mb-3">
+                                                    {{ $produk->deskripsi_produk }}</p>
+                                            </div>
                                             <div class="d-flex justify-content-between flex-lg-wrap">
                                                 <p class="text-dark fs-5 fw-bold mb-0">
                                                     Rp {{ number_format($produk->harga_kg, 0, ',', '.') }} / kg
@@ -204,13 +265,16 @@
                                                     data-id="{{ $produk->id }}"
                                                     data-nama="{{ $produk->nama_produk }}"
                                                     data-harga="{{ $produk->harga_kg }}"
-                                                    data-stok="{{ $produk->stok && $produk->stok->stok_kg > 0 ? $produk->stok->stok_kg : 0 }}"
-                                                    data-gambar="{{ asset('storage/' . $produk->foto_produk) }}">
-                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Pesan
+                                                    data-stok="{{ $produk->stok->stok_kg ?? 0 }}"
+                                                    data-status="{{ $produk->stok->status ?? 0 }}"
+                                                    data-gambar="{{ asset('storage/' . $produk->foto_produk) }}"
+                                                    @if (($produk->stok->status ?? 0) == 0) disabled @endif>
+                                                    @if (($produk->stok->status ?? 0) == 0)
+                                                        <i class="fa fa-ban me-2 text-danger"></i> Produk Nonaktif
+                                                    @else
+                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Pesan
+                                                    @endif
                                                 </button>
-
-
-
                                             </div>
                                         </div>
                                     </div>
@@ -226,7 +290,7 @@
     <!-- Fruits Shop End-->
 
     <!-- Fact Start -->
-    <div class="container-fluid py-5">
+    <div class="container-fluid py-3">
         <div class="container">
             <div class="bg-light p-4 rounded">
                 <div class="row g-4 text-center">
@@ -263,9 +327,10 @@
                         <div class="counter bg-white rounded p-4 h-100 shadow-sm">
                             <i class="fa fa-box fa-3x text-success mb-3"></i>
                             <h6 class="fw-bold text-uppercase small text-wrap">Produk Tersedia</h6>
-                            <h3 class="mb-0">9</h3>
+                            <h3 class="mb-0">{{ $totalProdukTersedia }}</h3>
                         </div>
                     </div>
+
 
                 </div>
             </div>
@@ -433,7 +498,14 @@
                 let nama = $btn.data("nama");
                 let harga = $btn.data("harga");
                 let stok = parseInt($btn.data("stok"));
-                let gambar = $btn.data("gambar"); // ✅ tambahin ini
+                let status = parseInt($btn.data("status")); // ⬅️ Tambahan
+                let gambar = $btn.data("gambar");
+
+                // Cek status produk aktif atau tidak
+                if (status === 0) { // ⬅️ Tambahan
+                    alert("Produk nonaktif, tidak bisa dipesan.");
+                    return;
+                }
 
                 if (stok <= 0) {
                     alert("Stok habis, tidak bisa dipesan.");
@@ -453,7 +525,7 @@
                         id: id,
                         nama: nama,
                         harga: harga,
-                        gambar: gambar // ✅ kirim juga ke backend
+                        gambar: gambar
                     },
                     success: function(res) {
                         if (res.success) {
@@ -474,6 +546,7 @@
             });
         });
     </script>
+
 
 
 </body>

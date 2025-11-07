@@ -19,7 +19,6 @@
         href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
         rel="stylesheet">
 
-    <!-- Hanya pilih satu Bootstrap (pakai CDN biar aman) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- DataTables -->
@@ -64,7 +63,8 @@
 
                 <li class="nav-item dropdown pe-3">
 
-                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
+                        data-bs-toggle="dropdown">
                         <img src="{{ asset('assets/img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
                         <span
                             class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::guard('admin')->user()->name }}</span>
@@ -167,7 +167,8 @@
 
             <!-- Stok -->
             <li class="nav-item">
-                <a class="nav-link {{ Request::is('admin/stok*') ? '' : 'collapsed' }}" href="{{ url('/admin/stok') }}">
+                <a class="nav-link {{ Request::is('admin/stok*') ? '' : 'collapsed' }}"
+                    href="{{ url('/admin/stok') }}">
                     <i class="bi bi-card-checklist"></i>
                     <span>Stok</span>
                 </a>
@@ -263,6 +264,8 @@
 
     <!-- Template Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <link href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
 
     @yield('script')
 
