@@ -7,6 +7,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use GuzzleHttp\Client;
+use Carbon\Carbon;
 
 class PesananController extends Controller
 {
@@ -42,11 +43,6 @@ class PesananController extends Controller
         return view('admin.pesananselesai', compact('pesananSelesai', 'pesananBatal'));
     }
 
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -54,7 +50,6 @@ class PesananController extends Controller
     {
         $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
-            'tanggal_pesanan' => 'required|date',
             'jenis_pengambilan' => 'required|string',
             'alamat' => 'required_if:jenis_pengambilan,diantar|string|nullable',
             'no_whatsapp' => 'required|string|max:20',
@@ -70,18 +65,22 @@ class PesananController extends Controller
                 return back()
                     ->withErrors(['stok' => "Stok {$produk->nama_produk} tidak mencukupi"])
                     ->withInput()
-                    ->with('modal', 'tambah-pesanan'); // trigger modal tetap terbuka
+                    ->with('modal', 'tambah-pesanan');
             }
         }
 
         DB::transaction(function () use ($request) {
+            // Gunakan waktu realtime WIB
+            $tanggalWIB = Carbon::now('Asia/Jakarta');
+
             $pesanan = Pesanan::create([
                 'nama_pelanggan' => $request->nama_pelanggan,
-                'tanggal_pesanan' => $request->tanggal_pesanan,
+                'tanggal_pesanan' => $tanggalWIB,
                 'jenis_pengambilan' => $request->jenis_pengambilan,
                 'alamat' => $request->jenis_pengambilan === 'diantar' ? $request->alamat : '-',
                 'no_whatsapp' => $request->no_whatsapp,
                 'total_harga' => 0,
+                'status_pesanan' => 'diproses',
             ]);
 
             $totalHarga = 0;
@@ -108,21 +107,23 @@ class PesananController extends Controller
 
                 $totalHarga += $harga;
 
-                $detailPesananText .= "- {$produk->nama_produk} x {$jumlah} kg @ Rp" . number_format($produk->harga_kg,0,',','.') . " = Rp" . number_format($harga,0,',','.') . "\n";
+                $detailPesananText .= "- {$produk->nama_produk} x {$jumlah} kg @ Rp" . number_format($produk->harga_kg, 0, ',', '.') . " = Rp" . number_format($harga, 0, ',', '.') . "\n";
             }
 
             $pesanan->update(['total_harga' => $totalHarga]);
 
-            // Pesan WhatsApp lengkap
+            // Format waktu WIB untuk pesan WA
+            $tanggalFormatted = $tanggalWIB->translatedFormat('d F Y, H:i') . " WIB";
+
             $pesan = "*Sakura Hidroponik*\n\n" .
                 "Halo {$pesanan->nama_pelanggan},\n" .
                 "Pesanan kamu telah kami terima ✅\n\n" .
-                "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+                "📅 Tanggal Pesanan: {$tanggalFormatted}\n" .
                 "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
                 ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "") .
                 "\n*Rincian Pesanan:*\n" .
                 $detailPesananText .
-                "\n*Total Harga: Rp" . number_format($totalHarga,0,',','.') . "*\n\n" .
+                "\n*Total Harga: Rp" . number_format($totalHarga, 0, ',', '.') . "*\n\n" .
                 "Terima kasih telah berbelanja di Sakura Hidroponik 💚";
 
             $this->sendWa($pesanan->no_whatsapp, $pesan);
@@ -131,18 +132,8 @@ class PesananController extends Controller
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat!');
     }
 
-    public function show(string $id)
-    {
-        //
-    }
-
-    public function edit(string $id)
-    {
-        //
-    }
-
     /**
-     * Update the specified resource in storage.
+     * Update status pesanan (selesai / dibatalkan)
      */
     public function updateStatus(Request $request, $id)
     {
@@ -151,7 +142,6 @@ class PesananController extends Controller
         $status = $request->input('status');
         $alasan = $request->input('alasan');
 
-        // Validasi sederhana
         if (!$status || !in_array($status, ['diproses', 'selesai', 'dibatalkan'])) {
             return response()->json(['success' => false, 'message' => 'Status tidak valid'], 422);
         }
@@ -160,7 +150,7 @@ class PesananController extends Controller
             return response()->json(['success' => false, 'message' => 'Alasan harus diisi'], 422);
         }
 
-        // Kalau dibatalkan → kembalikan stok produk
+        // Jika dibatalkan → kembalikan stok
         if ($status === 'dibatalkan' && $pesanan->status_pesanan !== 'dibatalkan') {
             foreach ($pesanan->details as $detail) {
                 if ($detail->produk && $detail->produk->stok) {
@@ -169,12 +159,15 @@ class PesananController extends Controller
             }
         }
 
-        // Update status dan alasan
         $pesanan->status_pesanan = $status;
         $pesanan->alasan_dibatalkan = $status === 'dibatalkan' ? $alasan : null;
         $pesanan->save();
 
-        // Pesan WhatsApp lengkap
+        // Format waktu WIB untuk pesan WA
+        $tanggalFormatted = Carbon::parse($pesanan->tanggal_pesanan)
+            ->setTimezone('Asia/Jakarta')
+            ->translatedFormat('d F Y');
+
         $pesan = "*Sakura Hidroponik*\n\n" .
             "Halo {$pesanan->nama_pelanggan},\n" .
             "Status pesanan kamu telah diperbarui 📨\n\n" .
@@ -182,11 +175,11 @@ class PesananController extends Controller
             "*Rincian Pesanan:*\n";
 
         foreach ($pesanan->details as $detail) {
-            $pesan .= "- {$detail->nama_produk} x {$detail->jumlah_kg} kg @ Rp" . number_format($detail->harga_produk,0,',','.') . " = Rp" . number_format($detail->harga,0,',','.') . "\n";
+            $pesan .= "- {$detail->nama_produk} x {$detail->jumlah_kg} kg @ Rp" . number_format($detail->harga_produk, 0, ',', '.') . " = Rp" . number_format($detail->harga, 0, ',', '.') . "\n";
         }
 
-        $pesan .= "\n*Total Harga: Rp" . number_format($pesanan->total_harga,0,',','.') . "*\n" .
-            "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+        $pesan .= "\n*Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "*\n" .
+            "📅 Tanggal Pesanan: {$tanggalFormatted}\n" .
             "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
             ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "");
 
@@ -201,11 +194,6 @@ class PesananController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy(string $id)
-    {
-        //
-    }
-
     // Fungsi kirim WhatsApp
     private function sendWa($no_hp, $pesan)
     {
@@ -215,7 +203,7 @@ class PesananController extends Controller
         try {
             $response = $client->post($url, [
                 'form_params' => [
-                    'apiKey'  => '3d36e250d0b4d2fca5cada2d66c0c408', // ganti jika token berubah
+                    'apiKey'  => '3d36e250d0b4d2fca5cada2d66c0c408',
                     'phone'   => json_encode([$no_hp]),
                     'message' => $pesan,
                     'delay'   => 1

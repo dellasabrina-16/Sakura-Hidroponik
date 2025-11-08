@@ -7,6 +7,7 @@ use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use GuzzleHttp\Client;
+use Carbon\Carbon;
 
 class CustomerPesananController extends Controller
 {
@@ -35,13 +36,17 @@ class CustomerPesananController extends Controller
             $pesanan = null;
 
             DB::transaction(function () use ($request, $keranjang, &$pesanan) {
+                // Gunakan waktu realtime WIB
+                $tanggalWIB = Carbon::now('Asia/Jakarta');
+
                 $pesanan = Pesanan::create([
                     'nama_pelanggan' => $request->nama_pelanggan,
-                    'tanggal_pesanan' => now(),
+                    'tanggal_pesanan' => $tanggalWIB,
                     'jenis_pengambilan' => $request->jenis_pengambilan,
                     'alamat' => $request->jenis_pengambilan === 'diantar' ? $request->alamat : '-',
                     'no_whatsapp' => $request->no_whatsapp,
                     'total_harga' => 0,
+                    'status_pesanan' => 'diproses',
                 ]);
 
                 $totalHarga = 0;
@@ -72,17 +77,22 @@ class CustomerPesananController extends Controller
 
                     $totalHarga += $harga;
 
-                    $detailPesananText .= "- {$produk->nama_produk} x {$item['jumlah']} kg @ Rp" . number_format($produk->harga_kg, 0, ',', '.') . " = Rp" . number_format($harga, 0, ',', '.') . "\n";
+                    $detailPesananText .= "- {$produk->nama_produk} x {$item['jumlah']} kg @ Rp" .
+                        number_format($produk->harga_kg, 0, ',', '.') .
+                        " = Rp" . number_format($harga, 0, ',', '.') . "\n";
                 }
 
                 $pesanan->update(['total_harga' => $totalHarga]);
                 session()->forget('keranjang');
 
-                // Pesan WhatsApp nota lengkap
+                // Format tanggal WIB untuk pesan WhatsApp
+                $tanggalFormatted = $tanggalWIB->translatedFormat('d F Y, H:i') . " WIB";
+
+                // Pesan WhatsApp lengkap
                 $pesan = "*Sakura Hidroponik*\n\n" .
                     "Halo {$pesanan->nama_pelanggan},\n" .
                     "Pesanan kamu telah kami terima ✅\n\n" .
-                    "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+                    "📅 Tanggal Pesanan: {$tanggalFormatted}\n" .
                     "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
                     ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "") .
                     "\n*Rincian Pesanan:*\n" .
