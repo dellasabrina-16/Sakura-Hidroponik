@@ -161,12 +161,12 @@ class PesananController extends Controller
 
         $pesanan->status_pesanan = $status;
         $pesanan->alasan_dibatalkan = $status === 'dibatalkan' ? $alasan : null;
+        $pesanan->alasan_dibatalkan = $status === 'dibatalkan' ? $alasan : null;
         $pesanan->save();
 
-        // Format waktu WIB untuk pesan WA
-        $tanggalFormatted = Carbon::parse($pesanan->tanggal_pesanan)
-            ->setTimezone('Asia/Jakarta')
-            ->translatedFormat('d F Y');
+        $tanggalFormatted = Carbon::parse($pesanan->created_at)
+            ->translatedFormat('d F Y, H:i') . " WIB";
+
 
         $pesan = "*Sakura Hidroponik*\n\n" .
             "Halo {$pesanan->nama_pelanggan},\n" .
