@@ -45,6 +45,7 @@ class CustomerPesananController extends Controller
                 ]);
 
                 $totalHarga = 0;
+                $detailPesananText = "";
 
                 foreach ($keranjang as $id => $item) {
                     $produk = Produk::findOrFail($id);
@@ -70,18 +71,24 @@ class CustomerPesananController extends Controller
                     }
 
                     $totalHarga += $harga;
+
+                    $detailPesananText .= "- {$produk->nama_produk} x {$item['jumlah']} kg @ Rp" . number_format($produk->harga_kg, 0, ',', '.') . " = Rp" . number_format($harga, 0, ',', '.') . "\n";
                 }
 
                 $pesanan->update(['total_harga' => $totalHarga]);
                 session()->forget('keranjang');
 
-                // ✅ Kirim pesan WhatsApp ke pelanggan setelah pesanan dibuat
+                // Pesan WhatsApp nota lengkap
                 $pesan = "*Sakura Hidroponik*\n\n" .
                     "Halo {$pesanan->nama_pelanggan},\n" .
                     "Pesanan kamu telah kami terima ✅\n\n" .
-                    "Tanggal: {$pesanan->tanggal_pesanan}\n" .
-                    "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
-                    "Kami akan segera memproses pesananmu 🙏";
+                    "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+                    "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
+                    ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "") .
+                    "\n*Rincian Pesanan:*\n" .
+                    $detailPesananText .
+                    "\n*Total Harga: Rp" . number_format($totalHarga, 0, ',', '.') . "*\n\n" .
+                    "Terima kasih telah berbelanja di Sakura Hidroponik 💚";
 
                 $this->sendWa($pesanan->no_whatsapp, $pesan);
             });

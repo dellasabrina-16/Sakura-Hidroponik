@@ -85,6 +85,7 @@ class PesananController extends Controller
             ]);
 
             $totalHarga = 0;
+            $detailPesananText = "";
 
             foreach ($request->produk as $item) {
                 $produk = Produk::findOrFail($item['id']);
@@ -106,17 +107,23 @@ class PesananController extends Controller
                 }
 
                 $totalHarga += $harga;
+
+                $detailPesananText .= "- {$produk->nama_produk} x {$jumlah} kg @ Rp" . number_format($produk->harga_kg,0,',','.') . " = Rp" . number_format($harga,0,',','.') . "\n";
             }
 
             $pesanan->update(['total_harga' => $totalHarga]);
 
-            // ✅ Kirim pesan WhatsApp ke pelanggan setelah pesanan dibuat
+            // Pesan WhatsApp lengkap
             $pesan = "*Sakura Hidroponik*\n\n" .
                 "Halo {$pesanan->nama_pelanggan},\n" .
                 "Pesanan kamu telah kami terima ✅\n\n" .
-                "Tanggal: {$pesanan->tanggal_pesanan}\n" .
-                "Total Harga: Rp" . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
-                "Kami akan segera memproses pesananmu 🙏";
+                "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+                "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
+                ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "") .
+                "\n*Rincian Pesanan:*\n" .
+                $detailPesananText .
+                "\n*Total Harga: Rp" . number_format($totalHarga,0,',','.') . "*\n\n" .
+                "Terima kasih telah berbelanja di Sakura Hidroponik 💚";
 
             $this->sendWa($pesanan->no_whatsapp, $pesan);
         });
@@ -167,17 +174,27 @@ class PesananController extends Controller
         $pesanan->alasan_dibatalkan = $status === 'dibatalkan' ? $alasan : null;
         $pesanan->save();
 
-        // ✅ Kirim pesan WhatsApp saat status berubah
+        // Pesan WhatsApp lengkap
         $pesan = "*Sakura Hidroponik*\n\n" .
             "Halo {$pesanan->nama_pelanggan},\n" .
             "Status pesanan kamu telah diperbarui 📨\n\n" .
-            "Status sekarang: *" . strtoupper($status) . "*\n";
+            "Status sekarang: *" . strtoupper($status) . "*\n\n" .
+            "*Rincian Pesanan:*\n";
 
-        if ($status === 'dibatalkan') {
-            $pesan .= "Alasan pembatalan: {$alasan}\n\n";
+        foreach ($pesanan->details as $detail) {
+            $pesan .= "- {$detail->nama_produk} x {$detail->jumlah_kg} kg @ Rp" . number_format($detail->harga_produk,0,',','.') . " = Rp" . number_format($detail->harga,0,',','.') . "\n";
         }
 
-        $pesan .= "Terima kasih telah berbelanja di Sakura Hidroponik 💚";
+        $pesan .= "\n*Total Harga: Rp" . number_format($pesanan->total_harga,0,',','.') . "*\n" .
+            "📅 Tanggal Pesanan: {$pesanan->tanggal_pesanan}\n" .
+            "🏠 Jenis Pengambilan: {$pesanan->jenis_pengambilan}\n" .
+            ($pesanan->jenis_pengambilan === 'diantar' ? "📍 Alamat: {$pesanan->alamat}\n" : "");
+
+        if ($status === 'dibatalkan') {
+            $pesan .= "\nAlasan pembatalan: {$alasan}\n";
+        }
+
+        $pesan .= "\nTerima kasih telah berbelanja di Sakura Hidroponik 💚";
 
         $this->sendWa($pesanan->no_whatsapp, $pesan);
 
@@ -189,7 +206,7 @@ class PesananController extends Controller
         //
     }
 
-    // ✅ Tambahkan fungsi kirim WhatsApp di bawah controller ini
+    // Fungsi kirim WhatsApp
     private function sendWa($no_hp, $pesan)
     {
         $client = new Client();
